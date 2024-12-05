@@ -59,7 +59,10 @@ body{
 .close:after {
   transform: rotate(-45deg);
 }
-.banner-movie::before{
+.overlay{
+  position: relative;
+}
+.overlay::before{
   position: absolute;
   top: 0;
   left: 0;
@@ -67,5 +70,6 @@ body{
   background: rgba(0,0, 0,0.4);
   height: 100%;
   width: 100%;
-  z-index: -3;
+  z-index: -1;
+  border-radius: 0.75rem;
 }

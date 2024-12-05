@@ -52,7 +52,7 @@ const Header = () => {
                     </ul>
                 </aside>
             </header>
-            <div className={`${nav ? 'block' : 'hidden'} h-dvh w-screen bg-black fixed top-0 bg-opacity-60`} onClick={() => setNav(!nav)}></div>
+            <div className={`${nav ? 'block' : 'hidden'} h-dvh w-screen bg-black fixed top-0 bg-opacity-60 z-40`} onClick={() => setNav(!nav)}></div>
         </>
     )
 }

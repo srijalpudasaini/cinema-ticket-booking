@@ -26,10 +26,10 @@ const Banner = () => {
                     slideToClickedSlide={true}
                     modules={[EffectCoverflow]}
                 >
-                    <SwiperSlide className='!w-[80vw]'>
+                    <SwiperSlide className='!w-[80vw] max-sm:!w-screen'>
                         <div className="container">
-                            <div className="banner-movie h-[70vh] rounded-xl relative flex justify-between flex-col">
-                                <img src="cover.jpeg" alt="" className="h-full w-full object-cover absolute rounded-xl -z-10" />
+                            <div className="banner-movie overlay h-[35vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] rounded-xl flex justify-between flex-col bg-[url('cover.jpg')]">
+                                <img src="cover.jpeg" alt="" className="h-full w-full object-cover object-center absolute rounded-xl -z-10" />
                                 <div className="banner-details p-5">
                                     <div className="rating">
                                         <FontAwesomeIcon icon={faStar} className='text-main' />
@@ -50,10 +50,10 @@ const Banner = () => {
                             </div>
                         </div>
                     </SwiperSlide>
-                    <SwiperSlide className='!w-[80vw]'>
+                    <SwiperSlide className='!w-[80vw] max-sm:!w-screen'>
                         <div className="container">
-                            <div className="banner-movie h-[70vh] rounded-xl relative flex justify-between flex-col">
-                                <img src="cover.jpeg" alt="" className="h-full w-full object-cover absolute rounded-xl -z-10" />
+                            <div className="banner-movie overlay h-[35vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] rounded-xl overlay flex justify-between flex-col">
+                                <img src="cover.jpeg" alt="" className="h-full w-full object-cover object-center absolute rounded-xl -z-10" />
                                 <div className="banner-details p-5">
                                     <div className="rating">
                                         <FontAwesomeIcon icon={faStar} className='text-main' />
@@ -74,10 +74,10 @@ const Banner = () => {
                             </div>
                         </div>
                     </SwiperSlide>
-                    <SwiperSlide className='!w-[80vw]'>
+                    <SwiperSlide className='!w-[80vw] max-sm:!w-screen'>
                         <div className="container">
-                            <div className="banner-movie h-[70vh] rounded-xl relative flex justify-between flex-col">
-                                <img src="cover.jpeg" alt="" className="h-full w-full object-cover absolute rounded-xl -z-10" />
+                            <div className="banner-movie overlay h-[35vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] rounded-xl overlay flex justify-between flex-col">
+                                <img src="cover.jpeg" alt="" className="h-full w-full object-cover object-center absolute rounded-xl -z-10" />
                                 <div className="banner-details p-5">
                                     <div className="rating">
                                         <FontAwesomeIcon icon={faStar} className='text-main' />
