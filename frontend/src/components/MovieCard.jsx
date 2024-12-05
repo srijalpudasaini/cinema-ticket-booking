@@ -8,7 +8,7 @@ const MovieCard = () => {
             <article className="movie-card h-96 max-sm:w-48 w-56">
                 <div className="movie-thumbnail relative rounded-lg overlay">
                     <img src="thumbnail.jpeg" alt="" className='h-full object-cover w-full rounded-lg relative -z-10' />
-                    <div className="card-rating absolute top-2 right-2 bg-white/30 backdrop-blur-sm px-1 rounded-md z-[2]">
+                    <div className="card-rating absolute top-2 right-2 bg-white/30 backdrop-blur-sm px-1 rounded-sm z-[2]">
                         <FontAwesomeIcon icon={faStar} className='text-main text-xs' />
                         <FontAwesomeIcon icon={faStar} className='text-main text-xs' />
                         <FontAwesomeIcon icon={faStar} className='text-main text-xs' />

@@ -4,72 +4,98 @@
 @tailwind components;
 @tailwind utilities;
 
-
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-:root{
-  --yellow:#F3DD67;
-  --black:#151515;
+:root {
+  --yellow: #F3DD67;
+  --black: #151515;
 }
-body{
+
+body {
   background: var(--black);
   overflow-x: hidden;
   font-family: "Poppins", sans-serif;
   color: white;
 }
-.text-main{
+
+.text-main {
   color: var(--yellow);
 }
-.bg-main{
+
+.bg-main {
   background: var(--yellow);
 }
-.bg-secondary{
+
+.bg-secondary {
   background: var(--black);
 }
-.line{
+
+.line {
   height: 1px;
   background: white;
   width: 14px;
   margin-bottom: 4px;
 }
-.line:first-child{
+
+.line:first-child {
   width: 18px;
 }
-.line:last-child{
+
+.line:last-child {
   width: 10px;
 }
-.close{
+
+.close {
   width: 20px;
   height: 20px;
 }
-.close:before, .close:after {
+
+.close:before,
+.close:after {
   position: absolute;
   content: ' ';
   height: 20px;
   width: 1px;
   background-color: #000;
 }
+
 .close:before {
   transform: rotate(45deg);
 }
+
 .close:after {
   transform: rotate(-45deg);
 }
-.overlay{
+
+.overlay {
   position: relative;
 }
-.overlay::before{
+
+.overlay::before {
   position: absolute;
   top: 0;
   left: 0;
   content: '';
-  background: rgba(0,0, 0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   height: 100%;
   width: 100%;
   z-index: -1;
   border-radius: 0.75rem;
+}
+
+.date-wrapper::-webkit-scrollbar {
+  height: 3px;
+  border-radius: 5px;
+}
+
+.date-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+
+.date-wrapper::-webkit-scrollbar-thumb {
+  background: #888; 
 }

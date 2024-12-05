@@ -8,6 +8,7 @@ import Layout from './routes/layouts/Layout.jsx'
 import AdminLayout from './routes/layouts/AdminLayout.jsx'
 import Add from './routes/admin/Add.jsx'
 import About from './routes/About.jsx'
+import Booking from './routes/Booking.jsx'
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path:"about",
         element: <About/>
+      },
+      {
+        path:"booking",
+        element: <Booking/>
       },
     ]
   },
