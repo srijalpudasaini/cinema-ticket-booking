@@ -1,7 +1,5 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes } from '@fortawesome/free-solid-svg-icons'
 
 const Header = () => {
     const location = useLocation();

@@ -27,6 +27,9 @@ body{
 .bg-main{
   background: var(--yellow);
 }
+.bg-secondary{
+  background: var(--black);
+}
 .line{
   height: 1px;
   background: white;
@@ -55,4 +58,14 @@ body{
 }
 .close:after {
   transform: rotate(-45deg);
+}
+.banner-movie::before{
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '';
+  background: rgba(0,0, 0,0.4);
+  height: 100%;
+  width: 100%;
+  z-index: -3;
 }
