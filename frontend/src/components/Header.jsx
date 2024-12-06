@@ -29,7 +29,7 @@ const Header = () => {
                             </nav>
                             <div className="user-icon flex items-center gap-2">
                                 <div className="rounded-full h-8 w-8 bg-gray-400"></div>
-                                Login
+                                <Link to='login'>Login</Link>
                             </div>
                         </div>
                         <button className='md:hidden' onClick={() => setNav(!nav)}>

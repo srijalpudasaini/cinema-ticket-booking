@@ -33,6 +33,15 @@ body {
 .bg-secondary {
   background: var(--black);
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
 
 .line {
   height: 1px;

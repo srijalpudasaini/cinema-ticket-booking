@@ -9,6 +9,8 @@ import AdminLayout from './routes/layouts/AdminLayout.jsx'
 import Add from './routes/admin/Add.jsx'
 import About from './routes/About.jsx'
 import Booking from './routes/Booking.jsx'
+import Login from './routes/Login.jsx'
+import Register from './routes/Register.jsx'
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
       {
         path:"booking",
         element: <Booking/>
+      },
+      {
+        path:"login",
+        element: <Login/>
+      },
+      {
+        path:"register",
+        element: <Register/>
       },
     ]
   },
