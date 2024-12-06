@@ -6,8 +6,8 @@ const UserLayout = () => {
     return (
         <>
             <div className="container my-8">
-                <div className="flex gap-2">
-                    <div className="w-1/4">
+                <div className="flex gap-2 max-md:flex-col">
+                    <div className="md:w-[30%] lg:w-1/4">
                         <UserSidebar />
                     </div>
                     <div className="rounded-lg bg-[#1A1A1A] flex-1 p-3">

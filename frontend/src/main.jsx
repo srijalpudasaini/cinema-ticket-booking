@@ -52,7 +52,7 @@ const router = createBrowserRouter([
             element:<Reservation/>
           },
           {
-            path:'profile',
+            path:'',
             element:<Profile/>
           },
           {
