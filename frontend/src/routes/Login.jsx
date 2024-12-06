@@ -58,14 +58,11 @@ const Login = () => {
                                 </a>
                             </div>
                             <div className="text-center">
-                                <button className="py-1 w-full text-black rounded-full bg-main">
+                                <button className="py-2 w-full text-black rounded-full bg-main">
                                     Login
                                 </button>
                                 <p className="mt-3">
-                                    Don't have an account?
-                                    <Link to="/register" className="text-main">
-                                        Register here
-                                    </Link>
+                                    Don't have an account? <Link to="/register" className="text-main">Register here</Link>
                                 </p>
                             </div>
                         </form>

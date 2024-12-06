@@ -24,7 +24,7 @@ const Booking = () => {
                         <FontAwesomeIcon icon={faStar} className='text-main' />
                     </div>
                     <h2 className='text-2xl mb-4'>Doctor Strange : Multiverse of Madness</h2>
-                    <table className='border-none w-1/4 text-sm'>
+                    <table className='border-none max-sm:w-3/4 w-1/2 lg:w-1/4 text-sm'>
                         <tr>
                             <td className='text-main'>Release Date:</td>
                             <td>05 Dec 2024</td>

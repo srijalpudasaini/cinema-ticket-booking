@@ -96,14 +96,11 @@ const Register = () => {
                             </a>
                         </div>
                         <div className="text-center">
-                            <button className="py-1 w-full text-black rounded-full bg-main">
+                            <button className="py-2 w-full text-black rounded-full bg-main">
                                 Register
                             </button>
                             <p className="mt-3">
-                                Already have an account?
-                                <Link to="/login" className="text-main">
-                                    Login here
-                                </Link>
+                                Already have an account? <Link to="/login" className="text-main">Login here</Link>
                             </p>
                         </div>
                     </form>

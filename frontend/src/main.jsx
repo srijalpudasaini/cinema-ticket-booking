@@ -11,6 +11,12 @@ import About from './routes/About.jsx'
 import Booking from './routes/Booking.jsx'
 import Login from './routes/Login.jsx'
 import Register from './routes/Register.jsx'
+import UserLayout from './routes/layouts/UserLayout.jsx'
+import Reservation from './routes/user/Reservation.jsx'
+import Profile from './routes/user/Profile.jsx'
+import History from './routes/user/History.jsx'
+import Tickets from './routes/user/Tickets.jsx'
+import ChangePassword from './routes/user/ChangePassword.jsx'
 
 const router = createBrowserRouter([
   {
@@ -36,6 +42,32 @@ const router = createBrowserRouter([
       {
         path:"register",
         element: <Register/>
+      },
+      {
+        path:"user/",
+        element:<UserLayout/>,
+        children:[
+          {
+            path:'reservations',
+            element:<Reservation/>
+          },
+          {
+            path:'profile',
+            element:<Profile/>
+          },
+          {
+            path:'history',
+            element:<History/>
+          },
+          {
+            path:'tickets',
+            element:<Tickets/>
+          },
+          {
+            path:'change-password',
+            element:<ChangePassword/>
+          },
+        ]
       },
     ]
   },

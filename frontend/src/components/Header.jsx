@@ -11,7 +11,9 @@ const Header = () => {
                 <div className="container">
                     <div className="flex items-center justify-between gap-16">
                         <div className="logo">
-                            <h2 className='text-4xl font-semibold'>Seat<span className='text-main'>ly</span></h2>
+                            <Link to='/'>
+                                <h2 className='text-4xl font-semibold'>Seat<span className='text-main'>ly</span></h2>
+                            </Link>
                         </div>
                         <div className='md:flex items-center gap-8 hidden'>
                             <nav>
