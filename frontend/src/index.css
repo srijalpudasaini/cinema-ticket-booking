@@ -21,7 +21,9 @@ body {
   font-family: "Poppins", sans-serif;
   color: white;
 }
-
+input {
+  color-scheme: dark;
+}
 .text-main {
   color: var(--yellow);
 }
@@ -114,13 +116,13 @@ input[type=number] {
 }
 .table-striped td{
   padding: 8px;
+  text-align: center;
 }
 .dropdown {
   display: block;
   visibility: hidden;
   max-height: 0;
   overflow: hidden;
-  /* transition: max-height 5s ease-in-out, visibility 5s ease-in-out; */
 }
 
 .dropdown.show {

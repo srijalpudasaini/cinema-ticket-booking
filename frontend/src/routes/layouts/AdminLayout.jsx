@@ -9,9 +9,11 @@ const AdminLayout = () => {
   return (
     <div className="flex transition-all duration-300 ease-in">
       <AdminSidebar setNav={setNav} nav={nav} />
-      <main className={`flex-1 p-2 transition-all duration-300 ease-in ${nav && 'ml-1/5'}`}>
+      <main className={`flex-1 transition-all duration-300 ease-in ${nav && 'ml-1/5'}`}>
         <AdminTopbar />
-        <Outlet />
+        <div className="p-3">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

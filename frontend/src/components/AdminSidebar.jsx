@@ -13,7 +13,7 @@ const AdminSidebar = ({ nav, setNav }) => {
   return (
     <div className={`transition-all duration-300 ease-in ${nav ? 'w-1/5' : 'w-20'}`}>
       <aside
-        className={`sidebar bg-[#1A1A1A] fixed left-0 h-screen top-0 p-2 transition-all duration-300 ease-in ${nav ? 'w-1/5 overflow-y-auto' : 'w-20'}`}
+        className={`sidebar bg-[#1A1A1A] fixed border-r left-0 h-screen top-0 p-2 transition-all duration-300 ease-in ${nav ? 'w-1/5 overflow-y-auto' : 'w-20'}`}
       >
         <div className={`flex items-center ${nav ? 'justify-between' : 'justify-center'}`}>
           <div className={nav ? 'block' : 'hidden'}>
@@ -49,12 +49,12 @@ const AdminSidebar = ({ nav, setNav }) => {
                 }`}
             >
               <li className="mb-1">
-                <Link to="/movies" className="hover:text-[#F3DD67]">
+                <Link to="movies" className="hover:text-[#F3DD67]">
                   Movies
                 </Link>
               </li>
               <li>
-                <Link to="/add-movie" className="hover:text-[#F3DD67]">
+                <Link to="movie/add" className="hover:text-[#F3DD67]">
                   Add Movie
                 </Link>
               </li>
@@ -76,12 +76,12 @@ const AdminSidebar = ({ nav, setNav }) => {
                 }`}
             >
               <li className="mb-1">
-                <Link to="/shows" className="hover:text-[#F3DD67]">
+                <Link to="shows" className="hover:text-[#F3DD67]">
                   Shows
                 </Link>
               </li>
               <li>
-                <Link to="/add-show" className="hover:text-[#F3DD67]">
+                <Link to="show/add" className="hover:text-[#F3DD67]">
                   Add Show
                 </Link>
               </li>
@@ -103,12 +103,12 @@ const AdminSidebar = ({ nav, setNav }) => {
                 }`}
             >
               <li className="mb-1">
-                <Link to="/halls" className="hover:text-[#F3DD67]">
+                <Link to="halls" className="hover:text-[#F3DD67]">
                   Halls
                 </Link>
               </li>
               <li>
-                <Link to="/add-hall" className="hover:text-[#F3DD67]">
+                <Link to="hall/add" className="hover:text-[#F3DD67]">
                   Add Hall
                 </Link>
               </li>
@@ -130,12 +130,12 @@ const AdminSidebar = ({ nav, setNav }) => {
                 }`}
             >
               <li className="mb-1">
-                <Link to="/seats" className="hover:text-[#F3DD67]">
+                <Link to="seats" className="hover:text-[#F3DD67]">
                   Seats
                 </Link>
               </li>
               <li>
-                <Link to="/add-seat" className="hover:text-[#F3DD67]">
+                <Link to="seat/add" className="hover:text-[#F3DD67]">
                   Add Seat
                 </Link>
               </li>

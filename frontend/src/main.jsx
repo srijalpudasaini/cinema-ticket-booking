@@ -6,7 +6,6 @@ import Home from './routes/Home.jsx'
 import Dashboard from './routes/admin/Dashboard.jsx'
 import Layout from './routes/layouts/Layout.jsx'
 import AdminLayout from './routes/layouts/AdminLayout.jsx'
-import Add from './routes/admin/Add.jsx'
 import About from './routes/About.jsx'
 import Booking from './routes/Booking.jsx'
 import Login from './routes/Login.jsx'
@@ -17,6 +16,14 @@ import Profile from './routes/user/Profile.jsx'
 import History from './routes/user/History.jsx'
 import Tickets from './routes/user/Tickets.jsx'
 import ChangePassword from './routes/user/ChangePassword.jsx'
+import AddMovie from './routes/admin/Movie/AddMovie.jsx'
+import Movies from './routes/admin/Movie/Movies.jsx'
+import AddShow from './routes/admin/Show/AddShow.jsx'
+import Shows from './routes/admin/Show/Shows.jsx'
+import AddHall from './routes/admin/Hall/AddHall.jsx'
+import Halls from './routes/admin/Hall/Halls.jsx'
+import AddSeat from './routes/admin/Seat/AddSeat.jsx'
+import Seats from './routes/admin/Seat/Seats.jsx'
 
 const router = createBrowserRouter([
   {
@@ -80,9 +87,37 @@ const router = createBrowserRouter([
         element:<Dashboard/>
       },
       {
-        path:"add",
-        element:<Add/>
-      }
+        path:"movie/add",
+        element:<AddMovie/>
+      },
+      {
+        path:"movies",
+        element:<Movies/>
+      },
+      {
+        path:"show/add",
+        element:<AddShow/>
+      },
+      {
+        path:"shows",
+        element:<Shows/>
+      },
+      {
+        path:"hall/add",
+        element:<AddHall/>
+      },
+      {
+        path:"halls",
+        element:<Halls/>
+      },
+      {
+        path:"seat/add",
+        element:<AddSeat/>
+      },
+      {
+        path:"seats",
+        element:<Seats/>
+      },
     ]
   },
 ]);
