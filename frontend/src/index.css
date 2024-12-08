@@ -30,6 +30,7 @@ body {
   background: var(--yellow);
 }
 
+
 .bg-secondary {
   background: var(--black);
 }
@@ -107,4 +108,22 @@ input[type=number] {
 
 .date-wrapper::-webkit-scrollbar-thumb {
   background: #888; 
+}
+.table-striped tr:nth-child(even){
+  background: #151515;
+}
+.table-striped td{
+  padding: 8px;
+}
+.dropdown {
+  display: block;
+  visibility: hidden;
+  max-height: 0;
+  overflow: hidden;
+  /* transition: max-height 5s ease-in-out, visibility 5s ease-in-out; */
+}
+
+.dropdown.show {
+  visibility: visible;
+  max-height: 35px;
 }
