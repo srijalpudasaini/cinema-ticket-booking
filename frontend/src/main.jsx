@@ -24,6 +24,12 @@ import AddHall from './routes/admin/Hall/AddHall.jsx'
 import Halls from './routes/admin/Hall/Halls.jsx'
 import AddSeat from './routes/admin/Seat/AddSeat.jsx'
 import Seats from './routes/admin/Seat/Seats.jsx'
+import ViewShow from './routes/admin/Show/ViewShow.jsx'
+import AdminProfile from './routes/admin/AdminProfile.jsx'
+import AdminChangePassword from './routes/admin/AdminChangePassword.jsx'
+import AddUser from './routes/admin/User/AddUser.jsx'
+import Users from './routes/admin/User/Users.jsx'
+import ViewUser from './routes/admin/User/ViewUser.jsx'
 
 const router = createBrowserRouter([
   {
@@ -99,6 +105,10 @@ const router = createBrowserRouter([
         element:<AddShow/>
       },
       {
+        path:"show/view",
+        element:<ViewShow/>
+      },
+      {
         path:"shows",
         element:<Shows/>
       },
@@ -117,6 +127,26 @@ const router = createBrowserRouter([
       {
         path:"seats",
         element:<Seats/>
+      },
+      {
+        path:"user/add",
+        element:<AddUser/>
+      },
+      {
+        path:"user/view",
+        element:<ViewUser/>
+      },
+      {
+        path:"users",
+        element:<Users/>
+      },
+      {
+        path:'profile',
+        element:<AdminProfile/>
+      },
+      {
+        path:'profile/change-password',
+        element:<AdminChangePassword/>
       },
     ]
   },

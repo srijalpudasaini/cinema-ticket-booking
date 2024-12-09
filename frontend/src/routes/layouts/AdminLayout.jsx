@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AdminTopbar from '../../components/AdminTopbar';
 import AdminSidebar from '../../components/AdminSidebar';
 import { Outlet } from 'react-router';
+import ScrollTop from '../../components/ScrollTop';
 
 const AdminLayout = () => {
   const [nav, setNav] = useState(true); // To control the sidebar state
@@ -15,6 +16,7 @@ const AdminLayout = () => {
           <Outlet />
         </div>
       </main>
+      <ScrollTop/>
     </div>
   );
 };

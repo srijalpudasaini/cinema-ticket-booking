@@ -27,7 +27,9 @@ const Shows = () => {
                     <td>Release Date</td>
                     <td>Active</td>
                     <td className='flex gap-4 justify-center'>
-                        <FontAwesomeIcon icon={faEye} className='text-green-600' size='xl'/>
+                        <Link to='/admin/show/view'>
+                            <FontAwesomeIcon icon={faEye} className='text-green-600' size='xl'/>
+                        </Link>
                         <FontAwesomeIcon icon={faPenSquare} className='text-blue-600' size='xl'/>
                         <FontAwesomeIcon icon={faTrash} className='text-red-600' size='xl'/>
                     </td>

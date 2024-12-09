@@ -90,11 +90,6 @@ const Register = () => {
                                 }
                             />
                         </div>
-                        <div className="text-end mb-3">
-                            <a href="#" className="text-main">
-                                Forgot your password?
-                            </a>
-                        </div>
                         <div className="text-center">
                             <button className="py-2 w-full text-black rounded-full bg-main">
                                 Register

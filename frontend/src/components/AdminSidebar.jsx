@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleDown, faClapperboard, faCouch, faFilm, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faAngleDown, faClapperboard, faCouch, faFilm, faUser, faVideo } from '@fortawesome/free-solid-svg-icons';
 
 const AdminSidebar = ({ nav, setNav }) => {
   const [activeDropdown, setActiveDropdown] = useState(null); // Track active dropdown globally
@@ -45,7 +45,7 @@ const AdminSidebar = ({ nav, setNav }) => {
               {nav && <FontAwesomeIcon icon={faAngleDown} />}
             </div>
             <ul
-              className={`text-sm overflow-hidden transition-all duration-600 ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'movie' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'movie' ? 'max-h-14' : 'max-h-0'
+              className={`text-sm overflow-hidden transition-all duration-800 ease-in ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'movie' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'movie' ? 'max-h-14' : 'max-h-0'
                 }`}
             >
               <li className="mb-1">
@@ -72,7 +72,7 @@ const AdminSidebar = ({ nav, setNav }) => {
               {nav && <FontAwesomeIcon icon={faAngleDown} />}
             </div>
             <ul
-              className={`text-sm overflow-hidden transition-all duration-600 ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'show' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'show' ? 'max-h-14' : 'max-h-0'
+              className={`text-sm overflow-hidden transition-all duration-800 ease-in ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'show' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'show' ? 'max-h-14' : 'max-h-0'
                 }`}
             >
               <li className="mb-1">
@@ -99,7 +99,7 @@ const AdminSidebar = ({ nav, setNav }) => {
               {nav && <FontAwesomeIcon icon={faAngleDown} />}
             </div>
             <ul
-              className={`text-sm overflow-hidden transition-all duration-600 ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'hall' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'hall' ? 'max-h-14' : 'max-h-0'
+              className={`text-sm overflow-hidden transition-all duration-800 ease-in ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'hall' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'hall' ? 'max-h-14' : 'max-h-0'
                 }`}
             >
               <li className="mb-1">
@@ -126,7 +126,7 @@ const AdminSidebar = ({ nav, setNav }) => {
               {nav && <FontAwesomeIcon icon={faAngleDown} />}
             </div>
             <ul
-              className={`text-sm overflow-hidden transition-all duration-600 ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'seat' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'seat' ? 'max-h-14' : 'max-h-0'
+              className={`text-sm overflow-hidden transition-all duration-800 ease-in ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'seat' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'seat' ? 'max-h-14' : 'max-h-0'
                 }`}
             >
               <li className="mb-1">
@@ -137,6 +137,33 @@ const AdminSidebar = ({ nav, setNav }) => {
               <li>
                 <Link to="seat/add" className="hover:text-[#F3DD67]">
                   Add Seat
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li className="mb-3 relative">
+            <div
+              className={`p-2 rounded-md flex items-center hover:bg-[#F3DD67] hover:text-black cursor-pointer ${nav ? 'justify-between' : 'justify-center'}`}
+              onClick={() => toggleDropdown('user')}
+            >
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faUser} />
+                <span className={`${nav ? 'block' : 'hidden'}`}>User</span>
+              </div>
+              {nav && <FontAwesomeIcon icon={faAngleDown} />}
+            </div>
+            <ul
+              className={`text-sm overflow-hidden transition-all duration-800 ease-in ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'user' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'user' ? 'max-h-14' : 'max-h-0'
+                }`}
+            >
+              <li className="mb-1">
+                <Link to="users" className="hover:text-[#F3DD67]">
+                  Users
+                </Link>
+              </li>
+              <li>
+                <Link to="user/add" className="hover:text-[#F3DD67]">
+                  Add User
                 </Link>
               </li>
             </ul>

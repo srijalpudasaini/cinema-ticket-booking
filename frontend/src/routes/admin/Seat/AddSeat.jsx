@@ -12,6 +12,13 @@ const AddSeat = () => {
                         <option value="">Hall 2</option>
                     </select>
                 </div>
+                <div className="form-group mb-3">
+                    <label htmlFor="row">Select Row</label>
+                    <select name="row" id="row" className='w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2'>
+                        <option value="">Row 1</option>
+                        <option value="">Row 2</option>
+                    </select>
+                </div>
                 <div className="text-center pt-3">
                     <button className="py-2 inline-block px-6 text-black rounded-full bg-main">
                         Add Seat
