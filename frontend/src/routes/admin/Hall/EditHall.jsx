@@ -1,0 +1,125 @@
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
+import Loader from '../../../components/Loader';
+import Cookies from 'js-cookie'
+
+
+const EditHall = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+
+    const [hall, setHall] = useState({});
+    const [price, setPrice] = useState();
+
+    const [loading, setLoading] = useState(true);
+    const token = Cookies.get('token')
+
+    useEffect(() => {
+        axios.get(`http://localhost:8000/api/hall/${id}`,{
+            headers:{
+              'Authorization':`Bearer ${token}`
+            }
+          })
+            .then((res) => {
+                setHall(res.data.hall)
+                setPrice(res.data.price)
+                setLoading(false)
+            })
+    }, [id]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target
+        setHall((prev) => ({
+            ...prev,
+            [name]: value
+        })
+        )
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            ...hall,
+            price
+        }
+
+        console.log(payload)
+        try {
+            const response = await axios.put(`http://localhost:8000/api/hall/update/${id}`, payload,{
+                headers:{
+                  'Authorization':`Bearer ${token}`
+                }
+              });
+            if (response.data.status) {
+                navigate('/admin/halls')
+            }
+        } catch (error) {
+            console.error('Error adding hall:', error);
+        }
+
+    }
+    return (
+        <>
+            <h2 className='text-2xl font-medium text-center mb-3'>Edit Hall</h2>
+            <div className="form-container w-fit md:w-3/4 p-8 mx-auto rounded-lg shadow-sm shadow-current text-sm text-gray-300">
+                {loading ? <Loader /> :
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group mb-3">
+                            <label htmlFor="name">Name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                id='name'
+                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                value={hall.name}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group mb-3">
+                            <label htmlFor="rows">No. of rows</label>
+                            <input
+                                type="number"
+                                name="rows"
+                                id='rows'
+                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                value={hall.rows}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group mb-3">
+                            <label htmlFor="cols">No. of cols</label>
+                            <input
+                                type="number"
+                                name="cols"
+                                id='cols'
+                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                value={hall.cols}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div className="form-group mb-3">
+                            <label htmlFor="price">Price</label>
+                            <input
+                                type="number"
+                                name="price"
+                                id='price'
+                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                value={price}
+                                onChange={(e) => setPrice(parseInt(e.target.value))}
+                            />
+                        </div>
+                        <div className="text-center pt-3">
+                            <button className="py-2 inline-block px-6 text-black rounded-full bg-main">
+                                Update Hall
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </>
+    )
+}
+
+export default EditHall

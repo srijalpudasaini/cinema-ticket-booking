@@ -1,9 +1,22 @@
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios from 'axios';
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import useAuthContext from '../context/AuthContext';
 
 const Register = () => {
+    const {user} = useAuthContext();
+    const navigate = useNavigate();
+
+      if(user){
+        if(user.role =='admin'){
+            navigate('/admin')
+        }
+        else{
+            navigate('/user')
+        }
+      }
     const [type, setType] = useState(true);
     const [ctype, setCtype] = useState(true);
 
@@ -23,13 +36,26 @@ const Register = () => {
         }, 0);
     };
 
+    const handleSubmit = async (e) =>{
+        e.preventDefault();
+        const formData = new FormData(e.target)
+
+        try {
+            await axios.post('http://localhost:8000/api/register',formData)
+            .then((res)=>console.log(res))
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
+
     return (
         <section className="login my-16">
             <div className="container">
                 <div className="w-fit p-8 mx-auto rounded-lg shadow-sm shadow-current text-sm text-gray-300">
                     <h2 className="text-2xl mb-2">Register</h2>
                     <p>Please create an account</p>
-                    <form className="mt-4">
+                    <form className="mt-4" onSubmit={handleSubmit}>
                         <div className="form-group mb-3">
                             <label htmlFor="name">Full Name</label>
                             <input
@@ -74,12 +100,12 @@ const Register = () => {
                             />
                         </div>
                         <div className="form-group mb-3 relative">
-                            <label htmlFor="cpassword">Confirm Password</label>
+                            <label htmlFor="password_confirmation">Confirm Password</label>
                             <input
                                 ref={confirmPasswordInputRef}
                                 type={ctype ? "password" : "text"}
-                                name="cpassword"
-                                id="cpassword"
+                                name="password_confirmation"
+                                id="password_confirmation"
                                 className="w-full outline-none border border-gray-500 rounded-md bg-black p-1"
                             />
                             <FontAwesomeIcon

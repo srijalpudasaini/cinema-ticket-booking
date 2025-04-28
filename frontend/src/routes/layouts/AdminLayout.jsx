@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminTopbar from '../../components/AdminTopbar';
 import AdminSidebar from '../../components/AdminSidebar';
-import { Outlet } from 'react-router';
+import { Outlet, useNavigate } from 'react-router';
 import ScrollTop from '../../components/ScrollTop';
+import useAuthContext from '../../context/AuthContext';
 
 const AdminLayout = () => {
-  const [nav, setNav] = useState(true); // To control the sidebar state
+  const [nav, setNav] = useState(true);
+  const { user } = useAuthContext();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!user || user.role != 'admin') {
+      navigate('/login')
+    }
+  }, [])
 
   return (
     <div className="flex transition-all duration-300 ease-in">
@@ -16,7 +24,7 @@ const AdminLayout = () => {
           <Outlet />
         </div>
       </main>
-      <ScrollTop/>
+      <ScrollTop />
     </div>
   );
 };

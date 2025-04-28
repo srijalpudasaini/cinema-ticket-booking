@@ -44,6 +44,7 @@ input::-webkit-inner-spin-button {
 
 input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .line {
@@ -128,4 +129,13 @@ input[type=number] {
 .dropdown.show {
   visibility: visible;
   max-height: 35px;
+}
+.animation-scale{
+  animation: scale 800ms ease-in-out 1 both;
+}
+
+@keyframes scale {
+  50%{
+    scale: 1.1;
+  }
 }

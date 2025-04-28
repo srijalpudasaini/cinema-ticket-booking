@@ -6,8 +6,8 @@ const Home = () => {
   return (
    <>
     <Banner/>
-    <MovieSection title={'Now showing'}/>
-    <MovieSection title={'Upcoming Movies'}/>
+    <MovieSection title={'Now showing'} status={'ongoing'}/>
+    <MovieSection title={'Upcoming Movies'} status={'upcoming'}/>
    </>
   )
 }

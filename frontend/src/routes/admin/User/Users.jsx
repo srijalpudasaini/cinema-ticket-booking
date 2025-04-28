@@ -1,9 +1,30 @@
 import { faEye, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React from 'react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import Loader from '../../../components/Loader'
+import Cookies from 'js-cookie'
+
 
 const Users = () => {
+
+    const [users, setUsers] = useState([]);
+
+    const [loading, setLoading] = useState(true);
+    const token = Cookies.get('token')
+
+    useEffect(() => {
+        axios.get('http://localhost:8000/api/users',{
+            headers:{
+              'Authorization':`Bearer ${token}`
+            }
+          })
+            .then((res) => {
+                setUsers(res.data.users)
+                setLoading(false)
+            })
+    }, [])
     return (
         <>
             <h2 className='text-2xl font-medium text-center mb-3'>Users</h2>
@@ -19,20 +40,27 @@ const Users = () => {
                         <td>Contact</td>
                         <td>Action</td>
                     </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Name</td>
-                        <td>Name</td>
-                        <td>Name</td>
-                        <td className='flex gap-4 justify-center'>
-                            <Link to='/admin/user/view'>
-                                <FontAwesomeIcon icon={faEye} className='text-blue-600' size='xl' />
-                            </Link>
-                            <FontAwesomeIcon icon={faTrash} className='text-red-600' size='xl' />
-                        </td>
-                    </tr>
+                    {
+                        loading ? <Loader /> :
+                            users && users.map((user, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{user.name}</td>
+                                    <td>{user.email}</td>
+                                    <td>{user.phone}</td>
+                                    <td className='flex gap-4 justify-center'>
+                                        <Link to={`/admin/user/view/${user.id}`}>
+                                            <FontAwesomeIcon icon={faEye} className='text-blue-600' size='xl' />
+                                        </Link>
+                                        <Link to={`/admin/user/delete/${user.id}`}>
+                                            <FontAwesomeIcon icon={faTrash} className='text-red-600' size='xl' />
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))
+                    }
                 </table>
-            </div>
+            </div >
         </>
     )
 }

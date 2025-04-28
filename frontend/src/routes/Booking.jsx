@@ -1,240 +1,483 @@
 import { faCirclePlay, faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useParams } from 'react-router'
+import axios from "axios"
+import Loader from '../components/Loader'
+import dayjs from "dayjs"
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import Modal from '../components/Modal'
+import Cookies from 'js-cookie'
+import BuyModal from '../components/BuyModal'
+
+dayjs.extend(customParseFormat);
 
 const Booking = () => {
+    const { slug } = useParams();
+    const [movie, setMovie] = useState({});
 
+    const [loading, setLoading] = useState(true)
+
+    const [dates, setDates] = useState([]);
+    const [halls, setHalls] = useState([]);
+    const [times, setTimes] = useState([]);
+
+    const [user, setUser] = useState();
+
+    const [selectedDate, setSelectedDate] = useState();
+    const [selectedHall, setSelectedHall] = useState({ id: '' });
+    const [selectedTime, setSelectedTime] = useState();
+    const [showSeats, setShowSeats] = useState([]);
+    const [show, setShow] = useState();
+
+    const [seatLoading, setSeatLoading] = useState(false);
+
+    const [selectedSeats, setSelectedSeats] = useState([]);
+    const [price, setPrice] = useState(0);
+
+    const [modalOpen, setModalOpen] = useState(false)
+    const [message, setMessage] = useState('')
+
+    const [buyModalOpen,setBuyModalOpen] = useState(false)
+
+    useEffect(() => {
+        if (!selectedDate) {
+            return;
+        }
+        const getHalls = async () => {
+            await axios.get('http://localhost:8000/api/hallsByDate', {
+                params: {
+                    id: movie.id,
+                    date: selectedDate
+                }
+            }).then(res => {
+                setHalls(res.data)
+            }
+            );
+        }
+        getHalls();
+    }, [selectedDate]);
+
+    useEffect(() => {
+        if (selectedHall && selectedDate) {
+            const getTimes = async () => {
+                await axios.get('http://localhost:8000/api/timesByHall', {
+                    params: {
+                        id: movie.id,
+                        date: selectedDate,
+                        hall_id: selectedHall.hall_id,
+                    }
+                }).then(res => {
+                    setTimes(res.data)
+                });
+            }
+            getTimes();
+        }
+    }, [selectedHall, selectedDate]);
+
+    useEffect(() => {
+        if (selectedHall && selectedDate && selectedTime) {
+            const getSeats = async () => {
+                await axios.get('http://localhost:8000/api/showSeats', {
+                    params: {
+                        id: movie.id,
+                        date: selectedDate,
+                        hall_id: selectedHall,
+                        time: selectedTime,
+                    }
+                }).then(res => {
+                    setShow(res.data);
+                    setShowSeats(res.data.show_seat)
+                    const selected = res.data.show_seat.filter(seat => seat.status === 'unavailable' && seat.user_id === user?.id);
+                    setSelectedSeats(selected)
+                }
+                );
+            }
+            getSeats();
+        }
+    }, [selectedHall, selectedDate, selectedTime]);
+    const generateSeats = () => {
+        const uniqueRows = Array.from(new Set(showSeats?.map((seat) => seat.row))).sort();
+        return uniqueRows.map((rowLabel) => {
+            const rowSeats = showSeats.filter((seat) => seat.row === rowLabel);
+            return (
+                <div key={rowLabel} className="row flex justify-center items-center gap-2 mb-2">
+                    {rowSeats.map((seat) => (
+                        <div
+                            onClick={() => (seat.status === 'available' || selectedSeats.includes(seat) || (seat.user_id == user.id && (seat.status == 'unavailable'))) && handleSeatSelection(seat)}
+                            key={seat.seat_id}
+                            className={`seat rounded-sm w-8 h-8 flex items-center justify-center text-white text-center cursor-not-allowed
+                                    ${(selectedSeats.includes(seat) || (seat.user_id == user?.id && seat.status == 'unavailable')) && user ? 'bg-blue-500 !cursor-pointer' :
+                                    seat.status == 'available' ? 'bg-green-500 !cursor-pointer' :
+                                        seat.status == 'reserved' ? 'bg-yellow-500' :
+                                            seat.status == 'unavailable' ? 'bg-gray-500' :
+                                                seat.status == 'bought' ? 'bg-red-500' : ''
+                                }
+                                `}
+                        >
+                            {seat.seat.number}
+                        </div>
+                    ))}
+                    <div>{rowLabel}</div>
+                </div>
+            );
+        });
+    }
+
+    useEffect(() => {
+        let total = 0;
+        selectedSeats.forEach(s => total += s.seat.price)
+        setPrice(total);
+    }, [selectedSeats])
+
+    const handleDateChange = (date) => {
+        if(date == selectedDate){
+            setSelectedDate(null);
+        }
+        else{
+            setSelectedDate(date.date);
+        }
+        setHalls([]);
+        setSelectedHall(null);
+        setSelectedTime(null);
+        setTimes([])
+    }
+    const handleHallChange = (event) => {
+        const sHall = halls.find(hall => hall.hall.id == event.target.value);
+        setSelectedTime(null)
+        setSelectedHall(sHall || null);
+    };
+
+    useEffect(() => {
+        const token = Cookies.get('token')
+        axios.get(`http://localhost:8000/api/movies/${slug}`)
+            .then((res) => {
+                setMovie(res.data.movie)
+                setLoading(false)
+            })
+        axios.get('http://localhost:8000/api/user', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        }).then((res) => {
+            setUser(res.data);
+        })
+    }, [slug])
+
+    useEffect(() => {
+        axios.get(`http://localhost:8000/api/movieDates`, {
+            params: {
+                id: movie.id
+            }
+        }).then((res) => {
+
+            const formattedDates = res.data.map((item) => {
+                const dateObj = new Date(item.date);
+                return {
+                    date: item.date,
+                    label: dateObj.toLocaleDateString("en-US", { weekday: "short" }),
+                    md: `${dateObj.getDate().toString().padStart(2, "0")} ${dateObj.toLocaleDateString("en-US", { month: "short" })}`
+                };
+            });
+
+            setDates(formattedDates);
+        })
+    }, [movie])
+
+
+    const handleSeatSelection = async (seat) => {
+        const token = Cookies.get('token');
+        if (!user) {
+            setMessage('You must be logged in to select a seat!');
+            setModalOpen(true);
+            return;
+        }
+        setSeatLoading(true);
+        try {
+            if (selectedSeats.some(s => s.seat_id == seat.seat_id)) {
+                setSelectedSeats(selectedSeats.filter((s) => s.seat_id !== seat.seat_id));
+                await axios.post('http://localhost:8000/api/show/seatSelect', {
+                    _method: 'PUT',
+                    show_id: show.id,
+                    seat_id: seat.seat_id
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                    .then((res) => {
+                        setShowSeats(res.data.show_seats)
+                    })
+            } else {
+                const res = await axios.post('http://localhost:8000/api/show/seatSelect', {
+                    _method: 'PUT',
+                    show_id: show.id,
+                    seat_id: seat.seat_id
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (res.data.status) {
+                    setSelectedSeats((prev) => ([...prev, seat]));
+                } else {
+                    setMessage(res.data.message);
+                    setModalOpen(true);
+                }
+            }
+        } catch (error) {
+            setMessage(error.response.data.message ? error.response.data.message : error.message);
+            setModalOpen(true);
+        }
+        finally {
+            setSeatLoading(false);
+        }
+    };
+    const resetSeats = async () => {
+        if (!user) {
+            return;
+        }
+        setSelectedSeats([]);
+        const token = Cookies.get('token');
+        try {
+            axios.post('http://localhost:8000/api/show/seatReset', {
+                _method: 'PUT',
+                show_id: show.id,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then((res) => {
+                setMessage('Seats reseted successfully')
+                setModalOpen(true)
+                setShowSeats(res.data.show_seats)
+            })
+        } catch (error) {
+            setMessage(error.response.data.message ? error.response.data.message : error.message)
+            setModalOpen(true)
+        }
+    }
+
+    const handleBuy = () =>{
+        if (!user) {
+            setMessage('Please login to buy seat');
+            setModalOpen(true)
+            return
+        }
+        if (selectedSeats.length === 0) {
+            setMessage('No seats selected');
+            setModalOpen(true)
+            return
+        }
+
+        setBuyModalOpen(true)
+
+    }
+
+
+    const handleReservation = async () => {
+        if (!user) {
+            setMessage('Please login to reserve a seat');
+            setModalOpen(true)
+            return
+        }
+        if (selectedSeats.length === 0) {
+            setMessage('No seats selected');
+            setModalOpen(true)
+            return
+        }
+        const s = []
+        selectedSeats.map((seat) => s.push(seat.seat_id));
+        const token = Cookies.get('token');
+
+        try {
+            await axios.post('http://localhost:8000/api/booking/store', {
+                show_id: show.id,
+                total: price,
+                seats: s.join(',')
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then((res) => {
+                if (res.data.status) {
+                    setMessage('Seat booking successful')
+                    setModalOpen(true)
+                    setShowSeats(res.data.show_seats)
+                    setSelectedSeats([])
+                }
+            })
+        } catch (error) {
+            setMessage(error.response.data.message || error.message)
+        }
+
+    }
     return (
         <>
-            <div className="container">
-                <div className="banner-booking rounded-xl h-[35vh] sm:h-[50vh] relative mt-8">
-                    <img src="cover.jpeg" alt="" className='h-full w-full rounded-xl object-cover' />
-                    <div className="absolute bottom-8 -translate-x-1/2 left-1/2">
-                        <a href="" className="border border-gray-500 text-xs py-2 w-32 text-center inline-block rounded-full bg-secondary me-3"><FontAwesomeIcon icon={faCirclePlay} className='me-2' />Watch Trailer</a>
-                    </div>
-                </div>
-            </div>
-            <div className="movie-details my-8">
-                <div className="container">
-                    <div className="rating-movie">
-                        <FontAwesomeIcon icon={faStar} className='text-main' />
-                        <FontAwesomeIcon icon={faStar} className='text-main' />
-                        <FontAwesomeIcon icon={faStar} className='text-main' />
-                        <FontAwesomeIcon icon={faStar} className='text-main' />
-                        <FontAwesomeIcon icon={faStar} className='text-main' />
-                    </div>
-                    <h2 className='text-2xl mb-4'>Doctor Strange : Multiverse of Madness</h2>
-                    <table className='border-none max-sm:w-3/4 w-1/2 lg:w-1/4 text-sm'>
-                        <tr>
-                            <td className='text-main'>Release Date:</td>
-                            <td>05 Dec 2024</td>
-                        </tr>
-                        <tr>
-                            <td className='text-main'>Run Time:</td>
-                            <td>2hr 09min</td>
-                        </tr>
-                        <tr>
-                            <td className='text-main'>Director:</td>
-                            <td>Srijal</td>
-                        </tr>
-                        <tr>
-                            <td className='text-main'>Genre:</td>
-                            <td>Action</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            <div className="booking-section">
-                <div className="container">
-                    <div className="flex max-lg:flex-col gap-2">
-                        <div className="w-1/4 max-lg:w-full">
-                            <div className="rounded-lg bg-[#1A1A1A] p-3">
-                                Select Hall
-                                <select name="" id="" className='w-full bg-[#151515] border border-gray-800 outline-none rounded-md p-1 mt-2'>
-                                    <option value="">Hall 1</option>
-                                    <option value="">Hall 2</option>
-                                    <option value="">Hall 3</option>
-                                </select>
-                            </div>
-                            <div className="rounded-lg bg-[#1A1A1A] p-3 mt-6">
-                                Select Date
-                                <div className="flex justify-between date-wrapper gap-2 mt-2 text-center text-[11px] w-full overflow-x-auto">
-                                    <div className="date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>Today</p>
-                                        <p>05 Dec</p>
-                                    </div>
-                                    <div className="date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>Tommorow</p>
-                                        <p>05 Dec</p>
-                                    </div>
-                                    <div className="date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>Sun</p>
-                                        <p>05 Dec</p>
-                                    </div>
-                                    <div className="date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>Sun</p>
-                                        <p>05 Dec</p>
-                                    </div>
-                                    <div className="date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>Sun</p>
-                                        <p>05 Dec</p>
-                                    </div>
-                                    <div className="date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>Sun</p>
-                                        <p>05 Dec</p>
-                                    </div>
-                                    <div className="date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>Mon</p>
-                                        <p>05 Dec</p>
-                                    </div>
+            {
+                loading ? <Loader /> :
+                    <>
+                        {modalOpen &&
+                            <Modal setOpen={setModalOpen} message={message} />
+                        }
+                        {buyModalOpen &&
+                            <BuyModal 
+                                setOpen={setBuyModalOpen}
+                                movie={movie.name}
+                                date={selectedDate}
+                                time={selectedTime}
+                                price={price}
+                                number={selectedSeats.length}
+                            />
+                        }
+                        <div className="container">
+                            <div className="banner-booking rounded-xl h-[35vh] sm:h-[50vh] relative mt-8">
+                                <img src={`http://localhost:8000/uploads/movies/cover/${movie.cover}`} alt="" className='h-full w-full rounded-xl object-cover' />
+                                <div className="absolute bottom-8 -translate-x-1/2 left-1/2">
+                                    <a href={movie.trailer} className="border border-gray-500 text-xs py-2 w-32 text-center inline-block rounded-full bg-secondary me-3" target='blank'><FontAwesomeIcon icon={faCirclePlay} className='me-2' />Watch Trailer</a>
                                 </div>
                             </div>
-                            <div className="rounded-lg bg-[#1A1A1A] p-3 mt-6">
-                                Select Time
-                                <div className="flex justify-between gap-2 mt-2 text-center text-[11px]">
-                                    <div className="time-card p-1 rounded-sm cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>10:00 PM</p>
+                        </div>
+                        <div className="movie-details my-8">
+                            <div className="container">
+                                <div className="rating-movie">
+                                    <FontAwesomeIcon icon={faStar} className='text-main' />
+                                    <FontAwesomeIcon icon={faStar} className='text-main' />
+                                    <FontAwesomeIcon icon={faStar} className='text-main' />
+                                    <FontAwesomeIcon icon={faStar} className='text-main' />
+                                    <FontAwesomeIcon icon={faStar} className='text-main' />
+                                </div>
+                                <h2 className='text-2xl mb-4'>{movie.name} : {movie.subtitle}</h2>
+                                <table className='border-none max-sm:w-3/4 w-1/2 lg:w-1/4 text-sm'>
+                                    <tr>
+                                        <td className='text-main'>Release Date:</td>
+                                        <td>{movie.release_date}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className='text-main'>Run Time:</td>
+                                        <td>{movie.runtime}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className='text-main'>Director:</td>
+                                        <td>{movie.director}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className='text-main'>Genre:</td>
+                                        <td>{movie.genre}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div className="booking-section">
+                            <div className="container">
+                                <div className="flex max-lg:flex-col gap-2">
+                                    <div className="w-1/4 max-lg:w-full">
+                                        <div className="rounded-lg bg-[#1A1A1A] p-3">
+                                            Select Date
+                                            <div className="flex date-wrapper gap-2 mt-2 text-center text-[11px] w-full overflow-x-auto">
+                                                {dates.map((date, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`date-card text-nowrap p-1 rounded-md cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black ${selectedDate == date.date ? '!bg-[#F3DD67] text-black' : ''}`}
+                                                        onClick={() => handleDateChange(date)}
+                                                    >
+                                                        <p>{date.label}</p>
+                                                        <p>{date.md}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="rounded-lg bg-[#1A1A1A] p-3 mt-6">
+                                            Select Hall
+                                            <select name="" id="" onChange={handleHallChange} className='w-full bg-[#151515] border border-gray-800 outline-none rounded-md p-1 mt-2'>
+                                                <option value="">Select a hall</option>
+                                                {halls.map((hall, index) => (
+                                                    <option value={hall.hall_id} key={index} selected={selectedHall == hall.hall_id}>{hall.hall.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="rounded-lg bg-[#1A1A1A] p-3 mt-6">
+                                            Select Time
+                                            <div className="flex gap-2 mt-2 text-center text-[11px]">
+                                                {times.map((time, index) => (
+                                                    <div className={`time-card p-1 rounded-sm cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black 
+                                                        ${selectedTime == time.time ? '!bg-[#F3DD67] text-black' : ''}`}
+                                                        key={index} onClick={() => setSelectedTime(time.time)}>
+                                                        <p>{dayjs(time.time, "HH:mm:ss").format("hh: mm A")}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="time-card p-1 rounded-sm cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>10:00 PM</p>
+                                    <div className="w-1/2 max-lg:w-full">
+
+                                        <div className='rounded-lg bg-[#1A1A1A] p-3 relative'>
+                                            {
+                                                seatLoading &&
+                                                <div className="absolute top-0 left-0 h-full w-full flex justify-center items-center bg-secondary">
+                                                    Loading
+                                                </div>
+                                            }
+                                            <img src="screen.png" className='w-1/2 absolute top-4 left-1/2 -translate-x-1/2' alt="" />
+                                            <div className="screen-text">
+                                                <h3 className="text-xl text-center mt-6">Screen Side</h3>
+                                            </div>
+                                            <div className="seat-wrapper mt-12">
+                                                {selectedDate && selectedHall && selectedTime &&
+                                                    <div className="">                                                        {generateSeats()}
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="time-card p-1 rounded-sm cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>10:00 PM</p>
-                                    </div>
-                                    <div className="time-card p-1 rounded-sm cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black">
-                                        <p>10:00 PM</p>
+                                    <div className="w-1/4 max-lg:w-full">
+                                        <div className='rounded-lg bg-[#1A1A1A] p-3'>
+                                            <div className="seat-status">
+                                                <div className="flex mb-2 gap-2 items-center">
+                                                    <div className="h-6 w-6 rounded-sm bg-green-500"></div>
+                                                    Available
+                                                </div>
+                                                <div className="flex mb-2 gap-2 items-center">
+                                                    <div className="h-6 w-6 rounded-sm bg-gray-500"></div>
+                                                    Unavailable
+                                                </div>
+                                                <div className="flex mb-2 gap-2 items-center">
+                                                    <div className="h-6 w-6 rounded-sm bg-blue-500"></div>
+                                                    Your Seat
+                                                </div>
+                                                <div className="flex mb-2 gap-2 items-center">
+                                                    <div className="h-6 w-6 rounded-sm bg-red-500"></div>
+                                                    Sold out
+                                                </div>
+                                                <div className="flex mb-2 gap-2 items-center">
+                                                    <div className="h-6 w-6 rounded-sm bg-yellow-500"></div>
+                                                    Reserved
+                                                </div>
+                                            </div>
+                                            <div className="seat-details mt-4 border-t pt-3">
+                                                <div className="flex justify-between mb-2">
+                                                    <p>Selected Seats</p>
+                                                    <p>{selectedTime && selectedSeats.map((seat) => (
+                                                        seat.seat.number + ', '
+                                                    ))}</p>
+                                                </div>
+                                                <div className="flex justify-between mb-2">
+                                                    <p>Total Price</p>
+                                                    <p>Rs. {selectedTime && selectedSeats && (price)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="action-btns flex gap-1 text-center flex-wrap mt-3">
+                                                <button onClick={handleBuy} className='py-1 px-2 rounded-full flex-grow bg-green-500'>Buy Tickets</button>
+                                                <button onClick={handleReservation} className='py-1 px-2 rounded-full flex-grow bg-yellow-500'>Reserve</button>
+                                                <button className='py-1 px-2 rounded-full flex-grow bg-red-500' onClick={resetSeats}>Reset</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="w-1/2 max-lg:w-full">
-                            <div className='rounded-lg bg-[#1A1A1A] p-3 relative'>
-                                <img src="screen.png" className='w-1/2 absolute top-4 left-1/2 -translate-x-1/2' alt="" />
-                                <div className="screen-text">
-                                    <h3 className="text-xl text-center mt-6">Screen Side</h3>
-                                </div>
-                                <div className="seat-wrapper mt-12">
-                                    <div className="">
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                            <div className="row flex justify-center gap-2 mb-2">
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div className="seat bg-green-500 rounded-sm px-2">1</div>
-                                                <div>A</div>
-                                            </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="w-1/4 max-lg:w-full">
-                            <div className='rounded-lg bg-[#1A1A1A] p-3'>
-                                <div className="seat-status">
-                                    <div className="flex mb-2 gap-2 items-center">
-                                        <div className="h-6 w-6 rounded-sm bg-green-500"></div>
-                                        Available
-                                    </div>
-                                    <div className="flex mb-2 gap-2 items-center">
-                                        <div className="h-6 w-6 rounded-sm bg-gray-500"></div>
-                                        Unavailable
-                                    </div>
-                                    <div className="flex mb-2 gap-2 items-center">
-                                        <div className="h-6 w-6 rounded-sm bg-blue-500"></div>
-                                        Your Seat
-                                    </div>
-                                    <div className="flex mb-2 gap-2 items-center">
-                                        <div className="h-6 w-6 rounded-sm bg-red-500"></div>
-                                        Sold out
-                                    </div>
-                                    <div className="flex mb-2 gap-2 items-center">
-                                        <div className="h-6 w-6 rounded-sm bg-yellow-500"></div>
-                                        Reserved
-                                    </div>
-                                </div>
-                                <div className="seat-details mt-4 border-t pt-3">
-                                    <div className="flex justify-between mb-2">
-                                        <p>Selected Seats</p>
-                                        <p>A1, B1, C1</p>
-                                    </div>
-                                    <div className="flex justify-between mb-2">
-                                        <p>Total Price</p>
-                                        <p>Rs. 660</p>
-                                    </div>
-                                </div>
-                                <div className="action-btns flex gap-1 text-center flex-wrap mt-3">
-                                    <a href="" className='py-1 px-2 rounded-full flex-grow bg-green-500'>Buy Tickets</a>
-                                    <a href="" className='py-1 px-2 rounded-full flex-grow bg-yellow-500'>Reserve</a>
-                                    <a href="" className='py-1 px-2 rounded-full flex-grow bg-red-500'>Reset</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    </>
+            }
         </>
     )
 }

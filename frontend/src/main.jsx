@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { createBrowserRouter, RouterProvider} from 'react-router'
+import { createBrowserRouter, RouterProvider } from 'react-router'
 import Home from './routes/Home.jsx'
 import Dashboard from './routes/admin/Dashboard.jsx'
 import Layout from './routes/layouts/Layout.jsx'
@@ -30,55 +30,59 @@ import AdminChangePassword from './routes/admin/AdminChangePassword.jsx'
 import AddUser from './routes/admin/User/AddUser.jsx'
 import Users from './routes/admin/User/Users.jsx'
 import ViewUser from './routes/admin/User/ViewUser.jsx'
+import EditHall from './routes/admin/Hall/EditHall.jsx'
+import EditMovie from './routes/admin/Movie/EditMovie.jsx'
+import EditShow from './routes/admin/Show/EditShow.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element:<Layout/>,
-    children:[
+    element: <Layout />,
+    children: [
       {
-        path:"",
-        element: <Home/>
+        path: "",
+        element: <Home />
       },
       {
-        path:"about",
-        element: <About/>
+        path: "about",
+        element: <About />
       },
       {
-        path:"booking",
-        element: <Booking/>
+        path: "booking/:slug",
+        element: <Booking />
       },
       {
-        path:"login",
-        element: <Login/>
+        path: "login",
+        element: <Login />
       },
       {
-        path:"register",
-        element: <Register/>
+        path: "register",
+        element: <Register />
       },
       {
-        path:"user/",
-        element:<UserLayout/>,
-        children:[
+        path: "user/",
+        element:<UserLayout />,
+        children: [
           {
-            path:'reservations',
-            element:<Reservation/>
+            path: 'reservations',
+            element: <Reservation />
           },
           {
-            path:'',
-            element:<Profile/>
+            path: '',
+            element: <Profile />
           },
           {
-            path:'history',
-            element:<History/>
+            path: 'history',
+            element: <History />
           },
           {
-            path:'tickets',
-            element:<Tickets/>
+            path: 'tickets',
+            element: <Tickets />
           },
           {
-            path:'change-password',
-            element:<ChangePassword/>
+            path: 'change-password',
+            element: <ChangePassword />
           },
         ]
       },
@@ -86,67 +90,85 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/",
-    element: <AdminLayout/>,
-    children:[
+    element:
+        <AdminLayout />
+      ,
+    children: [
       {
-        path:"",
-        element:<Dashboard/>
+        path: "",
+        element: <Dashboard />
       },
       {
-        path:"movie/add",
-        element:<AddMovie/>
+        path: "movie/add",
+        element: <AddMovie />
       },
       {
-        path:"movies",
-        element:<Movies/>
+        path: "movie/edit/:id",
+        element: <EditMovie />
       },
       {
-        path:"show/add",
-        element:<AddShow/>
+        path: "movies",
+        element: <Movies />
       },
       {
-        path:"show/view",
-        element:<ViewShow/>
+        path: "show/add",
+        element: <AddShow />
       },
       {
-        path:"shows",
-        element:<Shows/>
+        path: "show/edit/:id",
+        element: <EditShow />
       },
       {
-        path:"hall/add",
-        element:<AddHall/>
+        path: "show/view",
+        element: <ViewShow />
       },
       {
-        path:"halls",
-        element:<Halls/>
+        path: "shows",
+        element: <Shows />
       },
       {
-        path:"seat/add",
-        element:<AddSeat/>
+        path: "hall/add",
+        element: <AddHall />
       },
       {
-        path:"seats",
-        element:<Seats/>
+        path: "hall/edit/:id",
+        element: <EditHall />
       },
       {
-        path:"user/add",
-        element:<AddUser/>
+        path: "halls",
+        element: <Halls />
       },
       {
-        path:"user/view",
-        element:<ViewUser/>
+        path: "seat/add",
+        element: <AddSeat />
       },
       {
-        path:"users",
-        element:<Users/>
+        path: "seats",
+        element: <Seats />
       },
       {
-        path:'profile',
-        element:<AdminProfile/>
+        path: "user/add",
+        element: <AddUser />
       },
       {
-        path:'profile/change-password',
-        element:<AdminChangePassword/>
+        path: "user/edit/:id",
+        element: <AddUser />
+      },
+      {
+        path: "user/view/:id",
+        element: <ViewUser />
+      },
+      {
+        path: "users",
+        element: <Users />
+      },
+      {
+        path: 'profile',
+        element: <AdminProfile />
+      },
+      {
+        path: 'profile/change-password',
+        element: <AdminChangePassword />
       },
     ]
   },
@@ -156,6 +178,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    {/* <Provider store={store}> */}
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    {/* </Provider> */}
   </StrictMode>,
 )

@@ -1,9 +1,32 @@
 import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { useSelector } from 'react-redux';
+import { Link, useLocation, useNavigate } from 'react-router'
+import useAuthContext from '../context/AuthContext';
+import axios from 'axios';
+import Cookies from 'js-cookie'
 
 const Header = () => {
     const location = useLocation();
     const [nav, setNav] = useState(false)
+    const navigate = useNavigate()
+
+
+    const { user, logout } = useAuthContext();
+
+    const handleLogout = async () => {
+        const token = Cookies.get("token");
+        await axios.post("http://localhost:8000/api/logout", {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }).then(() => {
+            logout();
+            navigate("/login");
+        });
+    };
+
+
+
 
     return (
         <>
@@ -29,9 +52,19 @@ const Header = () => {
                                     </li>
                                 </ul>
                             </nav>
-                            <div className="user-icon flex items-center gap-2">
+                            <div className="user-icon flex items-center gap-2 relative group cursor-pointer z-50">
                                 <div className="rounded-full h-8 w-8 bg-gray-400"></div>
-                                <Link to='login'>Login</Link>
+                                {
+                                    user ? <>
+                                        <p>{user.name}</p>
+                                        <div className="user-dropdown absolute invisible top-[120%] left-10 group-hover:visible  group-hover:top-[110%] min-w-fit py-1 ps-2 pe-10 shadow-sm shadow-current rounded-sm transition-all ease-in duration-150">
+                                            <Link to={user.role == 'user' ? 'user' : 'admin'} className='block text-sm'>Profile</Link>
+                                            <p onClick={handleLogout} className='text-sm'>Logout</p>
+                                        </div>
+                                    </>
+                                        :
+                                        <Link to='login'>Login</Link>
+                                }
                             </div>
                         </div>
                         <button className='md:hidden' onClick={() => setNav(!nav)}>
@@ -50,7 +83,15 @@ const Header = () => {
                         <li className='mb-2'><Link to='/'>Home</Link></li>
                         <li className='mb-2'><Link to='/about'>About Us</Link></li>
                         <li className='mb-2'><Link to='/contact'>Contact Us</Link></li>
-                        <li className='mb-2'><Link to='/login'>Login</Link></li>
+                        {user ?
+                            <>
+                            <li className='mb-2'><Link to={user.role == 'user' ? 'user' : 'admin'}>Profile</Link></li>
+                            <li onClick={handleLogout} className='mb-2'>Logout</li>
+                            </>
+                            :
+
+                            <li className='mb-2'><Link to='/login'>Login</Link></li>
+                        }
                     </ul>
                 </aside>
             </header>
