@@ -3,19 +3,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
-import Cookies from 'js-cookie'
-import useAuthContext from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 const Login = () => {
 
-    const { user, login } = useAuthContext();
+    const { user, login } = useAuth();
     const navigate = useNavigate();
+    const [errors, setErrors] = useState({})
 
     useEffect(() => {
         if (user) {
             if (user.role === "admin") {
                 navigate("/admin");
             } else {
-                navigate("/user");
+                navigate("/");
             }
         }
     }, [user]);
@@ -26,7 +26,7 @@ const Login = () => {
         try {
             const res = await axios.post("http://localhost:8000/api/login", formData);
             if (res.data.status) {
-                login(res.data.token);
+                login(res.data.user, res.data.token);
                 if (res.data.user.role == 'user') {
                     navigate("/");
                 }
@@ -36,6 +36,12 @@ const Login = () => {
             }
         } catch (error) {
             console.log(error);
+            if(error.response.status == 404){
+                setErrors(error.response.data)
+            }
+            else{
+                setErrors(error.response.data.errors)
+            }
         }
     };
 
@@ -70,8 +76,9 @@ const Login = () => {
                                 <input
                                     type="email"
                                     name="email"
-                                    className="w-full outline-none border border-gray-500 rounded-md bg-black p-1"
+                                    className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.email && 'border-red-300'}`}
                                 />
+                                {errors?.email && <span className='text-red-400'>{errors?.email}</span>}
                             </div>
                             <div className="form-group mb-3 relative">
                                 <label htmlFor="password">Password</label>
@@ -79,14 +86,16 @@ const Login = () => {
                                     ref={passwordInputRef}
                                     type={type ? "password" : "text"}
                                     name="password"
-                                    className="w-full outline-none border border-gray-500 rounded-md bg-black p-1"
+                                    className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.password && 'border-red-300'}`}
                                 />
                                 <FontAwesomeIcon
                                     icon={icon}
                                     className="absolute right-2 top-7 cursor-pointer"
                                     onClick={togglePasswordVisibility}
                                 />
+                                {errors?.password && <span className='text-red-400'>{errors?.password}</span>}
                             </div>
+                            {errors?.message && <span className='text-red-400'>{errors?.message}</span>}
                             <div className="text-end mb-3">
                                 <a href="#" className="text-main">
                                     Forgot your password?

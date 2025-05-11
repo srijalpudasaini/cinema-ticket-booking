@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router'
-import useAuthContext from '../context/AuthContext';
-import axios from 'axios';
-import Cookies from 'js-cookie'
+import { useAuth } from '../context/AuthContext';
+// import useAuth from '../context/AuthContext';
 
 const Header = () => {
     const location = useLocation();
@@ -11,18 +9,11 @@ const Header = () => {
     const navigate = useNavigate()
 
 
-    const { user, logout } = useAuthContext();
+    const { user, logout } = useAuth();
 
     const handleLogout = async () => {
-        const token = Cookies.get("token");
-        await axios.post("http://localhost:8000/api/logout", {}, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }).then(() => {
-            logout();
-            navigate("/login");
-        });
+        await logout();
+        navigate("/login");
     };
 
 
@@ -85,8 +76,8 @@ const Header = () => {
                         <li className='mb-2'><Link to='/contact'>Contact Us</Link></li>
                         {user ?
                             <>
-                            <li className='mb-2'><Link to={user.role == 'user' ? 'user' : 'admin'}>Profile</Link></li>
-                            <li onClick={handleLogout} className='mb-2'>Logout</li>
+                                <li className='mb-2'><Link to={user.role == 'user' ? 'user' : 'admin'}>Profile</Link></li>
+                                <li onClick={handleLogout} className='mb-2'>Logout</li>
                             </>
                             :
 

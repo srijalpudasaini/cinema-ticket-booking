@@ -3,17 +3,16 @@ import AdminTopbar from '../../components/AdminTopbar';
 import AdminSidebar from '../../components/AdminSidebar';
 import { Outlet, useNavigate } from 'react-router';
 import ScrollTop from '../../components/ScrollTop';
-import useAuthContext from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminLayout = () => {
   const [nav, setNav] = useState(true);
-  const { user } = useAuthContext();
   const navigate = useNavigate();
-  useEffect(() => {
-    if (!user || user.role != 'admin') {
-      navigate('/login')
-    }
-  }, [])
+  const { user, loading } = useAuth();
+
+  if (loading) return <p>Loading...</p>;
+
+  if (!user || user.role != 'admin') navigate("/login")
 
   return (
     <div className="flex transition-all duration-300 ease-in">

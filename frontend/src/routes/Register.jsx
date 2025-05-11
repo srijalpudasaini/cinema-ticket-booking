@@ -3,10 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
-import useAuthContext from '../context/AuthContext';
+import {useAuth} from '../context/AuthContext';
 
 const Register = () => {
-    const {user} = useAuthContext();
+    const {user} = useAuth();
     const navigate = useNavigate();
 
       if(user){
@@ -22,6 +22,7 @@ const Register = () => {
 
     const passwordInputRef = useRef(null);
     const confirmPasswordInputRef = useRef(null);
+    const [errors,setErrors] = useState({})
 
     const togglePasswordVisibility = (event, ref, setter) => {
         event.preventDefault();
@@ -42,9 +43,14 @@ const Register = () => {
 
         try {
             await axios.post('http://localhost:8000/api/register',formData)
-            .then((res)=>console.log(res))
+            .then((res)=>{
+                if(res.data.status){
+                    navigate('/login')
+                }
+            })
         } catch (error) {
             console.log(error)
+            setErrors(error.response.data.errors)
         }
 
     }
@@ -62,8 +68,9 @@ const Register = () => {
                                 type="name"
                                 id="name"
                                 name="name"
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.name && 'border-red-300'}`}
                             />
+                            {errors?.name && <span className='text-red-400'>{errors?.name}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="phone">Phone</label>
@@ -71,8 +78,9 @@ const Register = () => {
                                 type="number"
                                 id="phone"
                                 name="phone"
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.phone && 'border-red-300'}`}
                             />
+                            {errors?.phone && <span className='text-red-400'>{errors?.phone}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="email">Email address</label>
@@ -80,8 +88,9 @@ const Register = () => {
                                 type="email"
                                 id="email"
                                 name="email"
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.email && 'border-red-300'}`}
                             />
+                            {errors?.email && <span className='text-red-400'>{errors?.email}</span>}
                         </div>
                         <div className="form-group mb-3 relative">
                             <label htmlFor="password">Password</label>
@@ -89,7 +98,7 @@ const Register = () => {
                                 ref={passwordInputRef}
                                 type={type ? "password" : "text"}
                                 name="password"
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.password && 'border-red-300'}`}
                             />
                             <FontAwesomeIcon
                                 icon={type ? faEye : faEyeSlash}
@@ -98,6 +107,7 @@ const Register = () => {
                                     togglePasswordVisibility(e, passwordInputRef, setType)
                                 }
                             />
+                            {errors?.password && <span className='text-red-400'>{errors?.password}</span>}
                         </div>
                         <div className="form-group mb-3 relative">
                             <label htmlFor="password_confirmation">Confirm Password</label>

@@ -10,18 +10,19 @@ const EditMovie = () => {
     const navigate = useNavigate();
 
     const [movie, setMovie] = useState({});
+    const [errors, setErrors] = useState({})
 
     const [loading, setLoading] = useState(true);
     const [cover, setCover] = useState(null);
     const [thumbnail, setThumbnail] = useState(null);
-     const token = Cookies.get('token')
+    const token = Cookies.get('token')
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/movie/${id}`,{
-            headers:{
-              'Authorization':`Bearer ${token}`
+        axios.get(`http://localhost:8000/api/movie/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-          })
+        })
             .then((res) => {
                 setMovie(res.data.movie)
                 setLoading(false)
@@ -48,8 +49,8 @@ const EditMovie = () => {
 
         try {
             const formData = new FormData();
-            
-            formData.append('_method','PUT');
+
+            formData.append('_method', 'PUT');
             formData.append('name', movie.name);
             formData.append('subtitle', movie.subtitle);
             formData.append('trailer', movie.trailer);
@@ -64,7 +65,7 @@ const EditMovie = () => {
             if (thumbnail) formData.append("thumbnail", thumbnail)
 
             const response = await axios.post(`http://localhost:8000/api/movie/update/${id}`, formData, {
-                headers: { "Content-Type": "multipart/form-data", 'Authorization' : `Bearer ${token}` }
+                headers: { "Content-Type": "multipart/form-data", 'Authorization': `Bearer ${token}` }
             });
             if (response.data.status) {
                 navigate('/admin/movies')
@@ -89,10 +90,11 @@ const EditMovie = () => {
                                 type="text"
                                 name="name"
                                 id='name'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.name && 'border-red-300'}`}
                                 value={movie.name}
                                 onChange={handleChange}
                             />
+                            {errors?.name && <span className='text-red-400'>{errors?.name}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="name">Subtitle</label>
@@ -100,10 +102,11 @@ const EditMovie = () => {
                                 type="text"
                                 name="subtitle"
                                 id='subtitle'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.subtitle && 'border-red-300'}`}
                                 value={movie.subtitle}
                                 onChange={handleChange}
                             />
+                            {errors?.subtitle && <span className='text-red-400'>{errors?.subtitle}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="rating">Rating</label>
@@ -111,10 +114,11 @@ const EditMovie = () => {
                                 type="number"
                                 name="rating"
                                 id='rating'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.rating && 'border-red-300'}`}
                                 value={movie.rating}
                                 onChange={handleChange}
                             />
+                            {errors?.rating && <span className='text-red-400'>{errors?.rating}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="release_date">Release Date</label>
@@ -122,11 +126,12 @@ const EditMovie = () => {
                                 type="date"
                                 name="release_date"
                                 id='release_date'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.release_date && 'border-red-300'}`}
                                 onFocus={handleFocus}
                                 value={movie.release_date}
                                 onChange={handleChange}
                             />
+                            {errors?.release_date && <span className='text-red-400'>{errors?.release_date}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="runtime">Run Time</label>
@@ -134,10 +139,11 @@ const EditMovie = () => {
                                 type="text"
                                 name="runtime"
                                 id='runtime'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.runtime && 'border-red-300'}`}
                                 value={movie.runtime}
                                 onChange={handleChange}
                             />
+                            {errors?.runtime && <span className='text-red-400'>{errors?.runtime}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="director">Director</label>
@@ -145,10 +151,11 @@ const EditMovie = () => {
                                 type="text"
                                 name="director"
                                 id='director'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.director && 'border-red-300'}`}
                                 value={movie.director}
                                 onChange={handleChange}
                             />
+                            {errors?.director && <span className='text-red-400'>{errors?.director}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="genre">Genre</label>
@@ -156,10 +163,11 @@ const EditMovie = () => {
                                 type="text"
                                 name="genre"
                                 id='genre'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.genre && 'border-red-300'}`}
                                 value={movie.genre}
                                 onChange={handleChange}
                             />
+                            {errors?.genre && <span className='text-red-400'>{errors?.genre}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="trailer">Trailer</label>
@@ -167,10 +175,11 @@ const EditMovie = () => {
                                 type="text"
                                 name="trailer"
                                 id='trailer'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.trailer && 'border-red-300'}`}
                                 value={movie.trailer}
                                 onChange={handleChange}
                             />
+                            {errors?.trailer && <span className='text-red-400'>{errors?.trailer}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="cover">Cover Image</label>
@@ -178,9 +187,10 @@ const EditMovie = () => {
                                 type="file"
                                 name="cover"
                                 id='cover'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.cover && 'border-red-300'}`}
                                 onChange={handleFileChange}
                             />
+                            {errors?.cover && <span className='text-red-400'>{errors?.cover}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="thumbnail">Thumbnail Image</label>
@@ -188,17 +198,19 @@ const EditMovie = () => {
                                 type="file"
                                 name="thumbnail"
                                 id='thumbnail'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.thumbnail && 'border-red-300'}`}
                                 onChange={handleFileChange}
                             />
+                            {errors?.thumbnail && <span className='text-red-400'>{errors?.thumbnail}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="status">Status</label>
-                            <select name="status" id="status" className='w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2' value={movie.status} onChange={handleChange}>
+                            <select name="status" id="status" className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2 ${errors?.status && 'border-red-300'}`} value={movie.status} onChange={handleChange}>
                                 <option value="upcoming" >Upcoming</option>
                                 <option value="ongoing" >Ongoing</option>
                                 <option value="previous" >Previous</option>
                             </select>
+                            {errors?.status && <span className='text-red-400'>{errors?.status}</span>}
                         </div>
                         <div className="text-center pt-3">
                             <button className="py-2 inline-block px-6 text-black rounded-full bg-main">

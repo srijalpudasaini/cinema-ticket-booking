@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import Cookies from 'js-cookie'
 import Modal from '../../components/Modal';
-import useAuthContext from '../../context/AuthContext';
+import {useAuth} from '../../context/AuthContext';
 
 const AdminProfile = () => {
-  const { user, getUser } = useAuthContext();
+  const { user } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +40,6 @@ const AdminProfile = () => {
         .then((res) => {
           setMessage(res.data.message)
           setModalOpen(true)
-          getUser()
         })
     } catch (error) {
       setMessage(error.response.data.message ? error.response.data.message : error.message)

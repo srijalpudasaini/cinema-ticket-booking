@@ -13,14 +13,15 @@ const EditHall = () => {
     const [price, setPrice] = useState();
 
     const [loading, setLoading] = useState(true);
+    const [errors, setErrors] = useState({})
     const token = Cookies.get('token')
 
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/hall/${id}`,{
-            headers:{
-              'Authorization':`Bearer ${token}`
+        axios.get(`http://localhost:8000/api/hall/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-          })
+        })
             .then((res) => {
                 setHall(res.data.hall)
                 setPrice(res.data.price)
@@ -47,16 +48,17 @@ const EditHall = () => {
 
         console.log(payload)
         try {
-            const response = await axios.put(`http://localhost:8000/api/hall/update/${id}`, payload,{
-                headers:{
-                  'Authorization':`Bearer ${token}`
+            const response = await axios.put(`http://localhost:8000/api/hall/update/${id}`, payload, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
-              });
+            });
             if (response.data.status) {
                 navigate('/admin/halls')
             }
         } catch (error) {
-            console.error('Error adding hall:', error);
+            console.error('Error updating hall:', error);
+            setErrors(error.response.data.errors)
         }
 
     }
@@ -72,10 +74,11 @@ const EditHall = () => {
                                 type="text"
                                 name="name"
                                 id='name'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.name && 'border-red-300'}`}
                                 value={hall.name}
                                 onChange={handleChange}
                             />
+                            {errors?.name && <span className='text-red-400'>{errors?.name}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="rows">No. of rows</label>
@@ -83,10 +86,11 @@ const EditHall = () => {
                                 type="number"
                                 name="rows"
                                 id='rows'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.rows && 'border-red-300'}`}
                                 value={hall.rows}
                                 onChange={handleChange}
                             />
+                            {errors?.rows && <span className='text-red-400'>{errors?.rows}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="cols">No. of cols</label>
@@ -94,10 +98,11 @@ const EditHall = () => {
                                 type="number"
                                 name="cols"
                                 id='cols'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.cols && 'border-red-300'}`}
                                 value={hall.cols}
                                 onChange={handleChange}
                             />
+                            {errors?.cols && <span className='text-red-400'>{errors?.cols}</span>}
                         </div>
                         <div className="form-group mb-3">
                             <label htmlFor="price">Price</label>
@@ -105,10 +110,11 @@ const EditHall = () => {
                                 type="number"
                                 name="price"
                                 id='price'
-                                className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.price && 'border-red-300'}`}
                                 value={price}
                                 onChange={(e) => setPrice(parseInt(e.target.value))}
                             />
+                            {errors?.price && <span className='text-red-400'>{errors?.price}</span>}
                         </div>
                         <div className="text-center pt-3">
                             <button className="py-2 inline-block px-6 text-black rounded-full bg-main">

@@ -1,16 +1,15 @@
 import React, { useEffect } from 'react'
 import UserSidebar from '../../components/UserSidebar'
 import { Outlet, useNavigate } from 'react-router'
-import useAuthContext from '../../context/AuthContext'
+import {useAuth} from '../../context/AuthContext'
 
 const UserLayout = () => {
     const navigate = useNavigate();
-    const { user } = useAuthContext();
-    useEffect(() => {
-        if (!user) {
-            navigate('/login')
-        }
-    }, [])
+    const { user, loading } = useAuth();
+
+    if (loading) return <p>Loading...</p>;
+
+    if (!user) navigate("/login")
     return (
         <>
             <div className="container my-20">

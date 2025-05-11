@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import Cookies from 'js-cookie'
 
@@ -7,6 +7,7 @@ import Cookies from 'js-cookie'
 const AddHall = () => {
 
   const navigate = useNavigate();
+  const [errors,setErrors] = useState({})
 
 
   const handleSubmit = async (e) =>{
@@ -25,6 +26,7 @@ const AddHall = () => {
       }
     } catch (error) {
       console.error('Error adding hall:', error);
+      setErrors(error.response.data.errors)
     }
 
   }
@@ -39,8 +41,9 @@ const AddHall = () => {
               type="text"
               name="name"
               id='name'
-              className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+              className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.name && 'border-red-300'}`}
             />
+            {errors?.name && <span className='text-red-400'>{errors?.name}</span>}
           </div>
           <div className="form-group mb-3">
             <label htmlFor="rows">No. of rows</label>
@@ -48,8 +51,9 @@ const AddHall = () => {
               type="number"
               name="rows"
               id='rows'
-              className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+              className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.rows && 'border-red-300'}`}
             />
+            {errors?.rows && <span className='text-red-400'>{errors?.rows}</span>}
           </div>
           <div className="form-group mb-3">
             <label htmlFor="cols">No. of cols</label>
@@ -57,8 +61,9 @@ const AddHall = () => {
               type="number"
               name="cols"
               id='cols'
-              className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+              className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.cols && 'border-red-300'}`}
             />
+            {errors?.cols && <span className='text-red-400'>{errors?.cols}</span>}
           </div>
           <div className="form-group mb-3">
             <label htmlFor="price">Price</label>
@@ -66,8 +71,9 @@ const AddHall = () => {
               type="number"
               name="price"
               id='price'
-              className="w-full outline-none border border-gray-500 rounded-md bg-black p-1 px-2"
+              className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.price && 'border-red-300'}`}
             />
+            {errors?.price && <span className='text-red-400'>{errors?.price}</span>}
           </div>
           <div className="text-center pt-3">
             <button className="py-2 inline-block px-6 text-black rounded-full bg-main">

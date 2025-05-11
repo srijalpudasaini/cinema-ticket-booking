@@ -1,47 +1,57 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
+import { createContext, useContext, useEffect, useState } from 'react';
+import axios from 'axios'; // your custom axios instance
+import Cookies from 'js-cookie';
 
-const AuthContext = createContext({});
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
-  const getUser = async () => {
-    const token = Cookies.get("token");
-    if (token) {
-      const { data } = await axios.get("http://localhost:8000/api/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUser(data);
-    }
-  };
+  const [user, setUser] = useState(null); // can store name/email/role etc.
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (Cookies.get("token")) {
-      getUser();
-    }
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get('http://localhost:8000/api/user', {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('token')}`
+          }
+        });
+        setUser(res.data);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
-  const login = async (token) => {
-    Cookies.set("token", token); 
-    await getUser(); 
+  const login = (userData, token) => {
+    setUser(userData);
+    Cookies.set('token', token);
   };
 
-  const logout = () => {
-    Cookies.remove("token"); 
-    setUser(null);
+  const logout = async () => {
+    try {
+      await axios.post('http://localhost:8000/api/logout', {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('token')}`
+        }
+      });
+    } catch (error) {
+      console.error('Logout failed', error);
+    } finally {
+      Cookies.remove('token');
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, getUser, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export default function useAuthContext() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

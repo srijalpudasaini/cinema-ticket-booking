@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import useAuthContext from '../../context/AuthContext'
+import {useAuth} from '../../context/AuthContext'
 import Cookies from 'js-cookie'
 import axios from 'axios';
 import Modal from '../../components/Modal';
 
 const Profile = () => {
-  const { user, getUser } = useAuthContext();
+  const { user } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -39,7 +39,6 @@ const Profile = () => {
         .then((res) => {
           setMessage(res.data.message)
           setModalOpen(true)
-          getUser()
         })
     } catch (error) {
       setMessage(error.response.data.message ? error.response.data.message : error.message)
