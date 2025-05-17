@@ -12,9 +12,10 @@ class ShowSeatController extends Controller
     {
         $request->validate([
             'show_id' => 'required|exists:shows,id',
+            'seat_id'=>'required|exists:show_seats,id'
         ]);
 
-        $seat = ShowSeat::where('show_id', $request->show_id)->where('seat_id', $request->seat_id)->first();
+        $seat = ShowSeat::findOrFail($request->seat_id);
 
         if (!$seat) {
             return response()->json([
@@ -60,12 +61,10 @@ class ShowSeatController extends Controller
     public function resetSeat(Request $request){
         $request->validate([
             'show_id' => 'required|exists:shows,id',
+            'seats.*'=>'exists:show_seats,id'
         ]);
-        $seats = ShowSeat::where('show_id',$request->show_id)
-                            ->where('user_id',$request->user()->id)
-                            ->where('status','unavailable')
-                            ->get();
-        foreach($seats as $seat){
+        foreach($request->seats as $id){
+            $seat =ShowSeat::findOrFail($id); 
             $seat->status = 'available';
             $seat->user_id = null;
             $seat->save();

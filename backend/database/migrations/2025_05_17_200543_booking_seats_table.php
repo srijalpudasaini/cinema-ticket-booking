@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('booking_seats', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('booking_id')->unsigned();
-            $table->bigInteger('seat_id')->unsigned();
+            $table->bigInteger('show_seat_id')->unsigned();
             $table->foreign('booking_id')->references('id')->on('bookings')->onDelete('cascade');
-            $table->foreign('seat_id')->references('id')->on('seats')->onDelete('cascade');
+            $table->foreign('show_seat_id')->references('id')->on('show_seats')->onDelete('cascade');
             $table->timestamps();
         });
     }

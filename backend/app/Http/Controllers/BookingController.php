@@ -7,6 +7,7 @@ use App\Models\Booking_seat;
 use App\Models\ShowSeat;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class BookingController extends Controller
 {
@@ -40,12 +41,10 @@ class BookingController extends Controller
         foreach ($seats as $seat) {
             $s = new Booking_seat();
             $s->booking_id = $booking->id;
-            $s->seat_id = $seat;
+            $s->show_seat_id = $seat;
             $s->save();
 
-            $show_seat = ShowSeat::where('show_id', $request->show_id)
-                ->where('seat_id', $seat)
-                ->first();
+            $show_seat = ShowSeat::findOrFail($seat);
 
             $show_seat->status = 'reserved';
             $show_seat->save();
@@ -69,11 +68,25 @@ class BookingController extends Controller
         $reservations = Booking::where('user_id', $user->id)
             ->where('status', 'reserved')
             ->with('show.movie')
-            ->with('booking_seats.seat')
+            ->with('booking_seats.showSeat.seat')
             ->get();
         return response()->json([
             'status' => true,
             'reservations' => $reservations
+        ]);
+    }
+    public function getTickets(Request $request)
+    {
+        $user = $request->user();
+
+        $tickets = Booking::where('user_id', $user->id)
+            ->where('status', 'bought')
+            ->with('show.movie')
+            ->with('booking_seats.showSeat.seat')
+            ->get();
+        return response()->json([
+            'status' => true,
+            'tickets' => $tickets
         ]);
     }
 
@@ -113,38 +126,125 @@ class BookingController extends Controller
         ]);
     }
 
-    public function buyTickets(Request $request){
+    public function buyTickets(Request $request)
+    {
         $request->validate([
             'show_id' => 'required',
             'total' => 'required',
-            'seats' => 'required'
+            'seats' => 'required',
+            'booking_id' => 'nullable|exists:bookings,id'
         ]);
 
-        $booking = new Booking();
 
-        $booking->user_id = $request->user()->id;
-        $booking->show_id = $request->show_id;
-        $booking->total_price = $request->total;
-        $booking->status = 'reserved';
-        $seats = explode(',', $request->seats);
-        $booking->save();
+        if ($request->has('booking_id')) {
+            $booking = Booking::findOrFail($request->booking_id);
 
-        foreach ($seats as $seat) {
-            $s = new Booking_seat();
-            $s->booking_id = $booking->id;
-            $s->seat_id = $seat;
-            $s->save();
+            switch ($request->payment_method) {
+                case 'esewa':
+                    $data = $this->paymentController($booking);
+                    return response()->json(['status' => true, 'data' => $data]);
+                case 'khalti':
+                    break;
+                default:
+                    return response()->json([
+                        'status' => false,
+                        'message' => ' Invalid payment option'
+                    ], 422);
+            }
+        } else {
         }
+        // $booking = new Booking();
+
+        // $booking->user_id = $request->user()->id;
+        // $booking->show_id = $request->show_id;
+        // $booking->total_price = $request->total;
+        // $booking->status = 'reserved';
+        // $seats = explode(',', $request->seats);
+        // $booking->save();
+
+        // foreach ($seats as $seat) {
+        //     $s = new Booking_seat();
+        //     $s->booking_id = $booking->id;
+        //     $s->seat_id = $seat;
+        //     $s->save();
+        // }
     }
 
-    public function paymentController(Booking $booking){
+    public function paymentController($booking)
+    {
         $transaction = new Transaction();
         $transaction->booking_id = $booking->id;
         $transaction->status = 'pending';
         $transaction->amount = $booking->total_price;
-        
-        $signature = base64_encode(hash_hmac('sha256', 'total_amount=' . $booking->total_price  . ',transaction_uuid=' . $transaction->id . ',product_code=EPAYTEST', '8gBm/:&EnhH.1/q', true));
+        $transaction->save();
+        // $transaction->payment_
+        $msg = 'total_amount=' . $booking->total_price . ',transaction_uuid=' . $transaction->id . ',product_code=EPAYTEST';
+        $s = base64_encode(hash_hmac('sha256', $msg, '8gBm/:&EnhH.1/q', true));
+        $data = [
+            'amount' => $booking->total_price,
+            'tax_amount' => 0,
+            'total_amount' => $booking->total_price,
+            'transaction_uuid' => $transaction->id,
+            'product_code' => 'EPAYTEST',
+            'product_service_charge' => 0,
+            'product_delivery_charge' => 0,
+            'success_url' => 'http://localhost:5173/user/tickets',
+            'failure_url' => 'http://localhost:5173/user/tickets?status=false',
+            'signed_field_names' => 'total_amount,transaction_uuid,product_code',
+            'signature' => $s,
+        ];
 
-        
+        return $data;
+    }
+
+    public function verifyEsewa(Request $request)
+    {
+        $data = $request->query('data');
+        $decodeData = base64_decode($data);
+
+        $decodeData = json_decode($decodeData, true);
+
+        if ($decodeData['status'] == 'COMPLETE') {
+            if (!is_array($decodeData) || !isset($decodeData['signed_field_names'])) {
+                return redirect()->back()->with('error', 'Invalid data format.');
+            }
+
+            $arrydata = $decodeData['signed_field_names'];
+            $signed = explode(',', $arrydata);
+
+            $msg = '';
+            foreach ($signed as $s) {
+                if ($s == 'total_amount') {
+                    $decodeData[$s] = str_replace(",", "", $decodeData[$s]);
+                }
+                $msg .= $s . '=' . $decodeData[$s] . ',';
+            }
+            $msg = rtrim($msg, ',');
+
+            $record = base64_encode(hash_hmac('sha256', $msg, '8gBm/:&EnhH.1/q', true));
+
+            $transaction = Transaction::findOrFail($decodeData['transaction_uuid']);
+
+
+            $booking = Booking::findOrFail($transaction->booking_id);
+
+            if ($decodeData['signature'] == $record) {
+                $transaction->status = "COMPLETED";
+                $transaction->save();
+                $booking->status = 'bought';
+                $booking->save();
+
+                $ids = $booking->booking_seats->pluck('showSeat.id')->toArray();
+
+                foreach($ids as $id){
+                    $showSeat = ShowSeat::findOrFail($id);
+                    $showSeat->status = 'bought';
+                    $showSeat->save();
+                }
+                return response()->json(['status' => true, 'message' => 'Ticket bought successfully!']);
+            } else {
+                return response()->json(['status' => false, 'message' => 'Transaction failed!']);
+            }
+        }
     }
 }

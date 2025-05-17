@@ -25,6 +25,11 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/updateProfile', [AuthController::class, 'updateProfile']);
     Route::put('/changePassword', [AuthController::class, 'changePassword']);
+
+    Route::post('/booking/buy',[BookingController::class,'buyTickets']);
+    Route::get('/esewa/verify',[BookingController::class,'verifyEsewa']);
+
+    Route::get('/tickets',[BookingController::class,'getTickets']);
 });
 
 Route::post('/register', [AuthController::class, 'register']);

@@ -9,7 +9,7 @@ class Booking_seat extends Model
     public function booking(){
         return $this->belongsTo(Booking::class);
     }
-    public function seat(){
-        return $this->belongsTo(Seat::class);
+    public function showSeat(){
+        return $this->belongsTo(ShowSeat::class);
     }
 }
