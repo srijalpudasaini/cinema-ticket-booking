@@ -7,7 +7,13 @@ use App\Models\Booking_seat;
 use App\Models\ShowSeat;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
+use Dompdf\Dompdf;
+use Illuminate\Support\Facades\Storage;
 
 class BookingController extends Controller
 {
@@ -232,11 +238,12 @@ class BookingController extends Controller
                 $transaction->status = "COMPLETED";
                 $transaction->save();
                 $booking->status = 'bought';
+                $booking->qr_token = Str::uuid();
                 $booking->save();
 
                 $ids = $booking->booking_seats->pluck('showSeat.id')->toArray();
 
-                foreach($ids as $id){
+                foreach ($ids as $id) {
                     $showSeat = ShowSeat::findOrFail($id);
                     $showSeat->status = 'bought';
                     $showSeat->save();
@@ -246,5 +253,32 @@ class BookingController extends Controller
                 return response()->json(['status' => false, 'message' => 'Transaction failed!']);
             }
         }
+    }
+    public function showQrCode(Request $request, $id)
+    {
+        $booking = Booking::with(['show.movie', 'show.hall', 'booking_seats.showSeat.seat'])->findOrFail($id);
+
+        if ($request->user()->id !== $booking->user_id) {
+            abort(403, 'Unauthorized access to this ticket');
+        }
+        $renderer = new ImageRenderer(
+            new RendererStyle(150),
+            new SvgImageBackEnd()
+        );
+        $qrCode = (new Writer($renderer))->writeString($booking->qr_token);
+
+        $data = [
+            'booking' => $booking,
+            'qrCode' => $qrCode,
+        ];
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml(view('tickets.pdf', $data));
+        $dompdf->setPaper('A6', 'portrait');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Access-Control-Expose-Headers', 'Content-Disposition')
+            ->header('Content-Disposition', 'attachment; filename="ticket-' . $booking->id . '.pdf"');
     }
 }

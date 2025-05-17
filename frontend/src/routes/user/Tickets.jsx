@@ -32,7 +32,7 @@ const Tickets = () => {
 
   const getTickets = async () => {
     setLoading(true)
-    try{
+    try {
       const res = await axios.get('http://localhost:8000/api/tickets', {
         headers: {
           Authorization: `Bearer ${Cookies.get('token')}`
@@ -41,13 +41,42 @@ const Tickets = () => {
       setTickets(res.data.tickets);
       setLoading(false)
     }
-    catch(error){
+    catch (error) {
       setLoading(false)
     }
   }
   useEffect(() => {
     getTickets()
   }, [])
+  const handleDownload = async (id) => {
+    try {
+      const token = Cookies.get('token');
+      const response = await fetch(`http://localhost:8000/api/bookings/${id}/ticket`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/pdf'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ticket-${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error('Download error:', error);
+      setMessage(error?.response?.data?.errors || 'Something went wrong');
+      setModalOpen(true);
+    }
+  };
+
   return (
     <>
       {
@@ -77,7 +106,8 @@ const Tickets = () => {
                   <td>{ticket.booking_seats.length}</td>
                   <td>{ticket.total_price}</td>
                   <td>
-                    <button className="rounded-sm bg-blue-500 text-white px-2 py-1 me-2">Download</button>
+                    <button className="rounded-sm bg-blue-500 text-white px-2 py-1 me-2"
+                      onClick={() => handleDownload(ticket.id)}>Download</button>
                   </td>
                 </tr>
               ))

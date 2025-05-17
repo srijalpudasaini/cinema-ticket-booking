@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Show extends Model
 {
+    protected $casts = [
+    'time' => 'datetime',
+    ];
     public function movie(){
         return $this->belongsTo(Movie::class);
     }

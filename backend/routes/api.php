@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::get('/esewa/verify',[BookingController::class,'verifyEsewa']);
 
     Route::get('/tickets',[BookingController::class,'getTickets']);
+    Route::get('/bookings/{id}/ticket', [BookingController::class, 'showQrCode']);
 });
 
 Route::post('/register', [AuthController::class, 'register']);

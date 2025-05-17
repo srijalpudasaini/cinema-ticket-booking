@@ -48,7 +48,7 @@ const Header = () => {
                                 {
                                     user ? <>
                                         <p>{user.name}</p>
-                                        <div className="user-dropdown absolute invisible top-[120%] left-10 group-hover:visible  group-hover:top-[110%] min-w-fit py-1 ps-2 pe-10 shadow-sm shadow-current rounded-sm transition-all ease-in duration-150">
+                                        <div className="user-dropdown absolute invisible top-[120%] left-10 group-hover:visible  group-hover:top-[110%] min-w-fit py-1 ps-2 pe-10 shadow-sm shadow-current rounded-sm transition-all ease-in duration-150 bg-black">
                                             <Link to={user.role == 'user' ? 'user' : 'admin'} className='block text-sm'>Profile</Link>
                                             <p onClick={handleLogout} className='text-sm'>Logout</p>
                                         </div>
