@@ -1,9 +1,11 @@
 import axios from 'axios';
 import React, { useState } from 'react'
 import Cookies from 'js-cookie'
+import { useNavigate } from 'react-router';
 
 const AddMovie = () => {
   const [errors, setErrors] = useState({})
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault();

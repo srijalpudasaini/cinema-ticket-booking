@@ -194,8 +194,8 @@ const Booking = () => {
         }
         setSeatLoading(true);
         try {
-            if (selectedSeats.some(s => s.seat_id == seat.seat_id)) {
-                setSelectedSeats(selectedSeats.filter((s) => s.seat_id !== seat.seat_id));
+            if (selectedSeats.some(s => s.seat_id == seat.id)) {
+                setSelectedSeats(selectedSeats.filter((s) => s.id !== seat.id));
                 await axios.post('http://localhost:8000/api/show/seatSelect', {
                     _method: 'PUT',
                     show_id: show.id,
@@ -212,7 +212,7 @@ const Booking = () => {
                 const res = await axios.post('http://localhost:8000/api/show/seatSelect', {
                     _method: 'PUT',
                     show_id: show.id,
-                    seat_id: seat.seat_id
+                    seat_id: seat.id
                 }, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -457,8 +457,10 @@ const Booking = () => {
                                             <div className="seat-details mt-4 border-t pt-3">
                                                 <div className="flex justify-between mb-2">
                                                     <p>Selected Seats</p>
-                                                    <p>{selectedTime && selectedSeats.map((seat) => (
-                                                        seat.seat.number + ', '
+                                                    <p>{selectedTime && selectedSeats.map((seat,index) => (
+                                                        <span>
+                                                            {seat.seat.number} {index == selectedSeats.length-1 ? '' : ', '}
+                                                        </span>
                                                     ))}</p>
                                                 </div>
                                                 <div className="flex justify-between mb-2">

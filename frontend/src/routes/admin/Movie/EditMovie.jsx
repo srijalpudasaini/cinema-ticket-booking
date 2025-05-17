@@ -72,6 +72,7 @@ const EditMovie = () => {
             }
         } catch (error) {
             console.error('Error adding hall:', error);
+            setErrors(error.response.data.errors)
         }
 
     }
