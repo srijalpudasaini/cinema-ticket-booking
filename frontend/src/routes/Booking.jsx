@@ -1,7 +1,7 @@
 import { faCirclePlay, faStar } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import axios from "axios"
 import Loader from '../components/Loader'
 import dayjs from "dayjs"
@@ -9,7 +9,9 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import Modal from '../components/Modal'
 import Cookies from 'js-cookie'
 import BuyModal from '../components/BuyModal'
+import utc from 'dayjs/plugin/utc';
 
+dayjs.extend(utc);
 dayjs.extend(customParseFormat);
 
 const Booking = () => {
@@ -38,7 +40,27 @@ const Booking = () => {
     const [modalOpen, setModalOpen] = useState(false)
     const [message, setMessage] = useState('')
 
-    const [buyModalOpen,setBuyModalOpen] = useState(false)
+    const [buyModalOpen, setBuyModalOpen] = useState(false)
+    const navigate = useNavigate()
+
+    const [recommendedSeats,setRecommendedSeats] = useState(null)
+
+     const formatMinutes = (minutes) =>{
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+
+        let result = '';
+
+        if (hours > 0) {
+            result += `${hours}hr`;
+        }
+
+        if (mins > 0 || hours === 0) {
+            result += (result ? ' ' : '') + `${mins} min`;
+        }
+
+        return result;
+    }
 
     useEffect(() => {
         if (!selectedDate) {
@@ -65,7 +87,7 @@ const Booking = () => {
                     params: {
                         id: movie.id,
                         date: selectedDate,
-                        hall_id: selectedHall.hall_id,
+                        hall_id: selectedHall?.hall_id,
                     }
                 }).then(res => {
                     setTimes(res.data)
@@ -82,7 +104,7 @@ const Booking = () => {
                     params: {
                         id: movie.id,
                         date: selectedDate,
-                        hall_id: selectedHall,
+                        hall_id: selectedHall?.hall_id,
                         time: selectedTime,
                     }
                 }).then(res => {
@@ -131,10 +153,10 @@ const Booking = () => {
     }, [selectedSeats])
 
     const handleDateChange = (date) => {
-        if(date == selectedDate){
+        if (date.date == selectedDate) {
             setSelectedDate(null);
         }
-        else{
+        else {
             setSelectedDate(date.date);
         }
         setHalls([]);
@@ -154,6 +176,9 @@ const Booking = () => {
             .then((res) => {
                 setMovie(res.data.movie)
                 setLoading(false)
+            })
+            .catch(err=>{
+                navigate('/404')  
             })
         axios.get('http://localhost:8000/api/user', {
             headers: {
@@ -194,71 +219,80 @@ const Booking = () => {
         }
         setSeatLoading(true);
         try {
-            if (selectedSeats.some(s => s.seat_id == seat.id)) {
-                setSelectedSeats(selectedSeats.filter((s) => s.id !== seat.id));
-                await axios.post('http://localhost:8000/api/show/seatSelect', {
-                    _method: 'PUT',
-                    show_id: show.id,
-                    seat_id: seat.seat_id
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-                    .then((res) => {
-                        setShowSeats(res.data.show_seats)
-                    })
+            let newSelectedSeats;
+            if (selectedSeats.some(s => s.id === seat.id)) {
+                // User is deselecting the seat
+                newSelectedSeats = selectedSeats.filter((s) => s.id !== seat.id);
             } else {
-                const res = await axios.post('http://localhost:8000/api/show/seatSelect', {
-                    _method: 'PUT',
-                    show_id: show.id,
-                    seat_id: seat.id
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (res.data.status) {
-                    setSelectedSeats((prev) => ([...prev, seat]));
-                } else {
-                    setMessage(res.data.message);
-                    setModalOpen(true);
+                // User is selecting the seat
+                newSelectedSeats = [...selectedSeats, seat];
+            }
+
+            // num_seats must be at least 1
+            const numSeatsToSend = newSelectedSeats.length > 0 ? newSelectedSeats.length : 1;
+
+            const res = await axios.post('http://localhost:8000/api/show/seatSelect', {
+                _method: 'PUT',
+                show_id: show.id,
+                seat_id: seat.id,
+                num_seats: numSeatsToSend,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
+            });
+
+            if (res.data.status) {
+                setShowSeats(res.data.show_seats);
+                setSelectedSeats(res.data.show_seats.filter(s => s.status === 'unavailable' && s.user_id === user?.id));
+                setRecommendedSeats(res.data.best_group_seats)
+            } else {
+                setMessage(res.data.message);
+                setShowSeats(res.data.show_seats);
+                setModalOpen(true);
             }
         } catch (error) {
-            setMessage(error.response.data.message ? error.response.data.message : error.message);
+            setMessage(error.response?.data?.message || error.message);
+            if (error.response?.data?.show_seats) {
+                setShowSeats(error.response?.data?.show_seats);
+            }
             setModalOpen(true);
-        }
-        finally {
+        } finally {
             setSeatLoading(false);
         }
     };
+
+
     const resetSeats = async () => {
         if (!user) {
             return;
         }
-        setSelectedSeats([]);
         const token = Cookies.get('token');
         try {
-            axios.post('http://localhost:8000/api/show/seatReset', {
+            setSeatLoading(true)
+            await axios.post('http://localhost:8000/api/show/seatReset', {
                 _method: 'PUT',
                 show_id: show.id,
+                seats:selectedSeats.map((s)=>s.id)
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             }).then((res) => {
                 setMessage('Seats reseted successfully')
+                setSelectedSeats([]);
+                setSeatLoading(false)
                 setModalOpen(true)
                 setShowSeats(res.data.show_seats)
             })
         } catch (error) {
             setMessage(error.response.data.message ? error.response.data.message : error.message)
+            setSeatLoading(false)
             setModalOpen(true)
         }
     }
 
-    const handleBuy = () =>{
+    const handleBuy = () => {
         if (!user) {
             setMessage('Please login to buy seat');
             setModalOpen(true)
@@ -287,7 +321,7 @@ const Booking = () => {
             return
         }
         const s = []
-        selectedSeats.map((seat) => s.push(seat.seat_id));
+        selectedSeats.map((seat) => s.push(seat.id));
         const token = Cookies.get('token');
 
         try {
@@ -321,7 +355,7 @@ const Booking = () => {
                             <Modal setOpen={setModalOpen} message={message} />
                         }
                         {buyModalOpen &&
-                            <BuyModal 
+                            <BuyModal
                                 setOpen={setBuyModalOpen}
                                 movie={movie.name}
                                 date={selectedDate}
@@ -355,7 +389,7 @@ const Booking = () => {
                                     </tr>
                                     <tr>
                                         <td className='text-main'>Run Time:</td>
-                                        <td>{movie.runtime}</td>
+                                        <td>{formatMinutes(movie.runtime)}</td>
                                     </tr>
                                     <tr>
                                         <td className='text-main'>Director:</td>
@@ -363,7 +397,7 @@ const Booking = () => {
                                     </tr>
                                     <tr>
                                         <td className='text-main'>Genre:</td>
-                                        <td>{movie.genre}</td>
+                                        <td>{movie.genres?.map((g) => g.name).join(", ")}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -403,7 +437,8 @@ const Booking = () => {
                                                     <div className={`time-card p-1 rounded-sm cursor-pointer transition-all duration-300 hover:bg-[#F3DD67] bg-black hover:text-black 
                                                         ${selectedTime == time.time ? '!bg-[#F3DD67] text-black' : ''}`}
                                                         key={index} onClick={() => setSelectedTime(time.time)}>
-                                                        <p>{dayjs(time.time, "HH:mm:ss").format("hh: mm A")}</p>
+                                                        {console.log(time)}
+                                                        <p>{dayjs.utc(time.time).format("hh:mm A")}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -424,7 +459,16 @@ const Booking = () => {
                                             </div>
                                             <div className="seat-wrapper mt-12">
                                                 {selectedDate && selectedHall && selectedTime &&
-                                                    <div className="">                                                        {generateSeats()}
+                                                    <div className="">
+                                                        {generateSeats()}
+                                                        {recommendedSeats?.length > 0 &&
+                                                            <p className="mt-4 text-center">
+                                                                Recommended Seats:
+                                                                {recommendedSeats?.map((seat)=>(
+                                                                    ` ${seat.row}${seat.col},`
+                                                                ))}
+                                                            </p>
+                                                        }
                                                     </div>
                                                 }
                                             </div>
@@ -457,9 +501,9 @@ const Booking = () => {
                                             <div className="seat-details mt-4 border-t pt-3">
                                                 <div className="flex justify-between mb-2">
                                                     <p>Selected Seats</p>
-                                                    <p>{selectedTime && selectedSeats.map((seat,index) => (
+                                                    <p>{selectedTime && selectedSeats.map((seat, index) => (
                                                         <span>
-                                                            {seat.seat.number} {index == selectedSeats.length-1 ? '' : ', '}
+                                                            {seat.seat.number} {index == selectedSeats.length - 1 ? '' : ', '}
                                                         </span>
                                                     ))}</p>
                                                 </div>

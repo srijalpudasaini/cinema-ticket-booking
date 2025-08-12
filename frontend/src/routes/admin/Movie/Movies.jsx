@@ -4,12 +4,15 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import Loader from '../../../components/Loader'
 import axios from 'axios'
+import DeleteModal from '../../../components/DeleteModal'
 
 const Movies = () => {
 
     const [movies, setMovies] = useState([]);
 
     const [loading, setLoading] = useState(true);
+    const [id,setId] = useState(null)
+    const [deleteModalOpen,setDeleteModalOpen] = useState(false)
 
     useEffect(() => {
         axios.get('http://localhost:8000/api/movies')
@@ -18,8 +21,15 @@ const Movies = () => {
                 setLoading(false)
             })
     }, [])
+    const handleDelete = (id) =>{
+        setId(id)
+        setDeleteModalOpen(true)
+    }
     return (
         <>
+         {deleteModalOpen && 
+            <DeleteModal model={'movie'} id={id} setOpen={setDeleteModalOpen} setData={setMovies}/>
+        }
             <h2 className='text-2xl font-medium text-center mb-3'>Movies</h2>
             <div className="text-end mb-4">
                 <Link to='/admin/movie/add' className='py-1 px-2 text-black bg-main'> + Add Movie</Link>
@@ -51,7 +61,7 @@ const Movies = () => {
                                         <Link to={`/admin/movie/edit/${movie.id}`}>
                                             <FontAwesomeIcon icon={faPenSquare} className='text-blue-600' size='xl' />
                                         </Link>
-                                        <FontAwesomeIcon icon={faTrash} className='text-red-600' size='xl' />
+                                        <FontAwesomeIcon icon={faTrash} className='text-red-600 cursor-pointer' size='xl' onClick={()=>handleDelete(movie.id)}/>
                                     </td>
                                 </tr>
                             ))

@@ -78,6 +78,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
+            'status'=>true,
             'message'=>'User updated successfully',
         ],200);        
     }
@@ -96,6 +97,7 @@ class UserController extends Controller
 
         return response()->json([
             'message'=>'User deleted successfully',
+             'users'=> User::orderBy('created_at','DESC')->get()
         ],200); 
     }
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleDown, faClapperboard, faCouch, faFilm, faUser, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faAngleDown, faClapperboard, faCouch, faFilm, faGauge, faLayerGroup, faQrcode, faUser, faVideo } from '@fortawesome/free-solid-svg-icons';
 
 const AdminSidebar = ({ nav, setNav }) => {
   const [activeDropdown, setActiveDropdown] = useState(null); // Track active dropdown globally
@@ -31,6 +31,22 @@ const AdminSidebar = ({ nav, setNav }) => {
         </div>
 
         <ul className="mt-8">
+          <li className="mb-3">
+            <Link to='/admin' className={`p-2 rounded-md gap-3 flex items-center hover:bg-[#F3DD67] hover:text-black cursor-pointer ${nav ? 'justify-start' : 'justify-center'}`}>
+              <FontAwesomeIcon icon={faGauge}/>
+               {nav &&
+                  <span className={`${nav ? 'block' : 'hidden'}`}>Dashboard</span>
+                }
+            </Link>
+          </li>
+          <li className="mb-3">
+            <Link to='scanner' className={`p-2 rounded-md gap-3 flex items-center hover:bg-[#F3DD67] hover:text-black cursor-pointer ${nav ? 'justify-start' : 'justify-center'}`}>
+              <FontAwesomeIcon icon={faQrcode}/>
+               {nav &&
+                  <span className={`${nav ? 'block' : 'hidden'}`}>Scanner</span>
+                }
+            </Link>
+          </li>
           <li className="mb-3 relative">
             <div
               className={`p-2 rounded-md flex items-center hover:bg-[#F3DD67] hover:text-black cursor-pointer ${nav ? 'justify-between' : 'justify-center'}`}
@@ -56,6 +72,35 @@ const AdminSidebar = ({ nav, setNav }) => {
               <li>
                 <Link to="movie/add" className="hover:text-[#F3DD67]">
                   Add Movie
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li className="mb-3 relative">
+            <div
+              className={`p-2 rounded-md flex items-center hover:bg-[#F3DD67] hover:text-black cursor-pointer ${nav ? 'justify-between' : 'justify-center'}`}
+              onClick={() => toggleDropdown('genre')}
+            >
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon icon={faLayerGroup} />
+                {nav &&
+                  <span className={`${nav ? 'block' : 'hidden'}`}>Genre</span>
+                }
+              </div>
+              {nav && <FontAwesomeIcon icon={faAngleDown} />}
+            </div>
+            <ul
+              className={`text-sm overflow-hidden transition-all duration-800 ease-in ${nav ? 'pl-5 mt-2' : 'absolute bg-[#1A1A1A] top-0 w-28 left-[4.5rem]'} ${!nav && activeDropdown === 'movie' ? 'p-1 text-nowrap' : ''} ${activeDropdown === 'genre' ? 'max-h-14' : 'max-h-0'
+                }`}
+            >
+              <li className="mb-1">
+                <Link to="genres" className="hover:text-[#F3DD67]">
+                  Genres
+                </Link>
+              </li>
+              <li>
+                <Link to="genre/add" className="hover:text-[#F3DD67]">
+                  Add Genre
                 </Link>
               </li>
             </ul>

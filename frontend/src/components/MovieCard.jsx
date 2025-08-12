@@ -4,6 +4,22 @@ import React from 'react'
 import { Link } from 'react-router'
 
 const MovieCard = ({ movie }) => {
+    const formatMinutes = (minutes) =>{
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+
+        let result = '';
+
+        if (hours > 0) {
+            result += `${hours}hr`;
+        }
+
+        if (mins > 0 || hours === 0) {
+            result += (result ? ' ' : '') + `${mins} min`;
+        }
+
+        return result;
+    }
     return (
         <>
             <article className="movie-card h-96 max-sm:w-48 w-56">
@@ -19,7 +35,7 @@ const MovieCard = ({ movie }) => {
                         </div>
                         <div className="absolute left-2 bottom-2 bg-white/30 backdrop-blur-sm py-1 px-2 rounded-sm z-[2] text-xs">
                             <FontAwesomeIcon icon={faClock} className='text-main me-2' />
-                            {movie.runtime}
+                            {formatMinutes(movie.runtime)}
                         </div>
                     </div>
                 </Link>

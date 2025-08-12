@@ -1,11 +1,19 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
 import { useNavigate } from 'react-router';
 
 const AddMovie = () => {
   const [errors, setErrors] = useState({})
   const navigate = useNavigate()
+  const [genres,setGenres] = useState([])
+
+  useEffect(()=>{
+    axios.get('http://localhost:8000/api/genres')
+      .then((res) => {
+        setGenres(res.data.genres)
+      })
+  },[])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -77,9 +85,9 @@ const AddMovie = () => {
             {errors?.release_date && <span className='text-red-400'>{errors?.release_date}</span>}
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="runtime">Run Time</label>
+            <label htmlFor="runtime">Run Time (in minutes)</label>
             <input
-              type="text"
+              type="number"
               name="runtime"
               id='runtime'
               className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.runtime && 'border-red-300'}`}
@@ -97,14 +105,19 @@ const AddMovie = () => {
             {errors?.director && <span className='text-red-400'>{errors?.director}</span>}
           </div>
           <div className="form-group mb-3">
-            <label htmlFor="genre">Genre</label>
-            <input
-              type="text"
-              name="genre"
-              id='genre'
-              className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.genre && 'border-red-300'}`}
-            />
-            {errors?.genre && <span className='text-red-400'>{errors?.genre}</span>}
+            <label htmlFor="genre">Genres</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {
+                genres && genres.map((genre, index) => (
+                  <div key={index}>
+                    <input type="checkbox" name='genres[]' value={genre.id} className='mr-3 p-1'/>
+                    {genre.name}
+                  </div>
+                )
+                )
+              }
+            </div>
+            {errors?.genres && <span className='text-red-400'>{errors?.genres}</span>}
           </div>
           <div className="form-group mb-3">
             <label htmlFor="trailer">Trailer</label>

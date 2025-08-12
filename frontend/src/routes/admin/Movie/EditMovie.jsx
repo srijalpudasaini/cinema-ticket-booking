@@ -9,13 +9,32 @@ const EditMovie = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [movie, setMovie] = useState({});
+    const [movie, setMovie] = useState({
+        name: '',
+        subtitle: '',
+        rating: '',
+        release_date: '',
+        runtime: '',
+        director: '',
+        trailer: '',
+        status: '',
+        genres: [],
+    });
+
     const [errors, setErrors] = useState({})
 
     const [loading, setLoading] = useState(true);
     const [cover, setCover] = useState(null);
     const [thumbnail, setThumbnail] = useState(null);
     const token = Cookies.get('token')
+    const [genres, setGenres] = useState([])
+
+    useEffect(() => {
+        axios.get('http://localhost:8000/api/genres')
+            .then((res) => {
+                setGenres(res.data.genres)
+            })
+    }, [])
 
     useEffect(() => {
         axios.get(`http://localhost:8000/api/movie/${id}`, {
@@ -24,10 +43,32 @@ const EditMovie = () => {
             }
         })
             .then((res) => {
-                setMovie(res.data.movie)
+                const movieData = res.data.movie;
+                setMovie({
+                    ...movieData,
+                    genres: movieData.genres?.map(g => g.id) || []
+                });
                 setLoading(false)
             })
+            .catch(err=>{
+                navigate('/admin/404')
+            }
+            )
     }, [id]);
+
+    const handleGenreChange = (e) => {
+        const { value, checked } = e.target;
+        setMovie((prev) => {
+            const selectedGenres = new Set(prev.genres || []);
+            if (checked) {
+                selectedGenres.add(+value);
+            } else {
+                selectedGenres.delete(+value);
+            }
+            return { ...prev, genres: Array.from(selectedGenres) };
+        });
+    };
+
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -58,7 +99,9 @@ const EditMovie = () => {
             formData.append('release_date', movie.release_date);
             formData.append('runtime', movie.runtime);
             formData.append('director', movie.director);
-            formData.append('genre', movie.genre);
+            movie.genres.forEach((genreId, index) => {
+                formData.append(`genres[${index}]`, genreId);
+            });
             formData.append('status', movie.status);
 
             if (cover) formData.append("cover", cover)
@@ -159,15 +202,20 @@ const EditMovie = () => {
                             {errors?.director && <span className='text-red-400'>{errors?.director}</span>}
                         </div>
                         <div className="form-group mb-3">
-                            <label htmlFor="genre">Genre</label>
-                            <input
-                                type="text"
-                                name="genre"
-                                id='genre'
-                                className={`w-full outline-none border border-gray-500 rounded-md bg-black p-1 ${errors?.genre && 'border-red-300'}`}
-                                value={movie.genre}
-                                onChange={handleChange}
-                            />
+                            <label htmlFor="genre">Genres</label>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                {
+                                    genres && genres.map((genre, index) => (
+                                        <div key={index}>
+                                            <input type="checkbox" name='genres[]' value={genre.id} className='mr-3 p-1' onChange={handleGenreChange} 
+                                            checked={movie?.genres.includes(genre.id)}
+                                            />
+                                            {genre.name}
+                                        </div>
+                                    )
+                                    )
+                                }
+                            </div>
                             {errors?.genre && <span className='text-red-400'>{errors?.genre}</span>}
                         </div>
                         <div className="form-group mb-3">

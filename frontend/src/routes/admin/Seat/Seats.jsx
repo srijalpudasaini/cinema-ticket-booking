@@ -22,7 +22,7 @@ const Seats = () => {
                     <td>Name</td>
                     <td className='flex gap-4 justify-center'>
                         <FontAwesomeIcon icon={faPenSquare} className='text-blue-600' size='xl'/>
-                        <FontAwesomeIcon icon={faTrash} className='text-red-600' size='xl'/>
+                        <FontAwesomeIcon icon={faTrash} className='text-red-600 cursor-pointer' size='xl'/>
                     </td>
                 </tr>
             </table>

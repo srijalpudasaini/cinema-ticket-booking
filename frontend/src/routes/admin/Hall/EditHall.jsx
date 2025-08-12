@@ -27,6 +27,9 @@ const EditHall = () => {
                 setPrice(res.data.price)
                 setLoading(false)
             })
+            .catch(err=>{
+                navigate('/admin/404')
+            })
     }, [id]);
 
     const handleChange = (e) => {

@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('seats', function (Blueprint $table) {
+        Schema::create('genres', function (Blueprint $table) {
             $table->id();
-            $table->string('number');
-            $table->char('row');
-            $table->integer('col');
-            $table->integer('price');
-            $table->bigInteger('hall_id')->unsigned();
-            $table->foreign('hall_id')->references('id')->on('halls')->onDelete('cascade');
+            $table->string('name');
+            $table->boolean('status');
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('seats');
+        Schema::dropIfExists('genres');
     }
 };

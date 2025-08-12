@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import Cookies from 'js-cookie'
+import Modal from '../../../components/Modal';
 
 const AddShow = () => {
 
@@ -9,6 +10,7 @@ const AddShow = () => {
   const [halls, setHalls] = useState([]);
   const navigate = useNavigate();
   const [errors, setErrors] = useState({})
+  const [modalOpen,setModalOpen] = useState(false)
   const handleFocus = (e) => {
     e.target.showPicker()
   }
@@ -39,12 +41,17 @@ const AddShow = () => {
           // console.log(res)
           navigate('/admin/shows')
         })
+
     } catch (error) {
-      setErrors(error.response.data.errors)
+      setErrors(error.response.data.errors || error.response.data.message)
+      setModalOpen(true)
     }
   }
   return (
     <>
+      {modalOpen &&
+        <Modal setOpen={setModalOpen} message={errors} />
+      }
       <h2 className='text-2xl font-medium text-center mb-3'>Add Show</h2>
       <div className="form-container w-fit md:w-3/4 p-8 mx-auto rounded-lg shadow-sm shadow-current text-sm text-gray-300">
         <form onSubmit={handleSubmit}>

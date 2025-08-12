@@ -16,14 +16,17 @@ const EditShow = () => {
     }
     const [errors, setErrors] = useState({})
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/show/${id}`), {
+        axios.get(`http://localhost:8000/api/show/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
-        }
+        })
             .then((res) => {
                 setShow(res.data.show)
                 setLoading(false)
+            })
+            .catch(err=>{
+                navigate('/admin/404')
             })
         axios.get('http://localhost:8000/api/movies')
             .then((res) => {

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import Loader from '../../../components/Loader'
 import Cookies from 'js-cookie'
+import DeleteModal from '../../../components/DeleteModal'
 
 
 const Users = () => {
@@ -15,18 +16,27 @@ const Users = () => {
     const token = Cookies.get('token')
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/users',{
-            headers:{
-              'Authorization':`Bearer ${token}`
+        axios.get('http://localhost:8000/api/users', {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
-          })
+        })
             .then((res) => {
                 setUsers(res.data.users)
                 setLoading(false)
             })
     }, [])
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [id, setId] = useState(null)
+    const handleDelete = (id) => {
+        setId(id)
+        setDeleteModalOpen(true)
+    }
     return (
         <>
+            {deleteModalOpen &&
+                <DeleteModal model={'user'} id={id} setOpen={setDeleteModalOpen} setData={setUsers} />
+            }
             <h2 className='text-2xl font-medium text-center mb-3'>Users</h2>
             <div className="text-end mb-4">
                 <Link to='/admin/user/add' className='py-1 px-2 text-black bg-main'> + Add User</Link>
@@ -53,7 +63,7 @@ const Users = () => {
                                             <FontAwesomeIcon icon={faEye} className='text-blue-600' size='xl' />
                                         </Link>
                                         <Link to={`/admin/user/delete/${user.id}`}>
-                                            <FontAwesomeIcon icon={faTrash} className='text-red-600' size='xl' />
+                                            <FontAwesomeIcon icon={faTrash} className='text-red-600 cursor-pointer' size='xl' onClick={() => handleDelete(user.id)} />
                                         </Link>
                                     </td>
                                 </tr>

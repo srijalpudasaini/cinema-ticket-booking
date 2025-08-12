@@ -113,7 +113,7 @@ const Tickets = () => {
               ))
               :
               <tr>
-                <td colSpan={6}>You do not have any reservations.</td>
+                <td colSpan={6}>You do not have any tickets.</td>
               </tr>
           }
         </table>

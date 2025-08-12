@@ -9,7 +9,6 @@ const Modal = ({ message, setOpen }) => {
                 <div className="text-end mb-2">
                     <FontAwesomeIcon icon={faTimes} onClick={()=>setOpen(false)} className='cursor-pointer'/>
                 </div>
-
                 <p className='mb-4 me-7'>{message}</p>
             </div>
         </div>

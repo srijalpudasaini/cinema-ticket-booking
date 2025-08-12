@@ -13,7 +13,6 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Dompdf\Dompdf;
-use Illuminate\Support\Facades\Storage;
 
 class BookingController extends Controller
 {
@@ -112,10 +111,9 @@ class BookingController extends Controller
             ], 401);
         }
 
-        $show_id = $reservation->show_id;
-        $seats = Booking_seat::where('booking_id', $reservation->id)->pluck('seat_id');
+        $seats = Booking_seat::where('booking_id', $reservation->id)->pluck('show_seat_id');
 
-        $show_seats = ShowSeat::where('show_id', $show_id)->whereIn('seat_id', $seats)->get();
+        $show_seats = ShowSeat::whereIn('id', $seats)->get();
 
         // Update the show seats status and user_id
         foreach ($show_seats as $show_seat) {
@@ -281,4 +279,25 @@ class BookingController extends Controller
             ->header('Access-Control-Expose-Headers', 'Content-Disposition')
             ->header('Content-Disposition', 'attachment; filename="ticket-' . $booking->id . '.pdf"');
     }
+    public function verify(Request $request)
+    {
+        $request->validate(['qr_token' => 'required|uuid']);
+
+        $booking = Booking::where('qr_token', $request->qr_token)->first();
+
+        if (!$booking) {
+            return response()->json(['message' => 'Invalid Ticket'], 404);
+        }
+
+        if ($booking->is_verified) {
+            return response()->json(['message' => 'Ticket already used'], 400);
+        }
+
+        $booking->is_verified = true;
+        $booking->verified_at = now();
+        $booking->save();
+
+        return response()->json(['message' => 'Ticket Verified', 'booking' => $booking]);
+    }
+    
 }

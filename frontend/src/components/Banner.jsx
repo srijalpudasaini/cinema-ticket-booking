@@ -6,6 +6,7 @@ import 'swiper/css'
 import 'swiper/css/effect-coverflow'
 import { EffectCoverflow } from 'swiper/modules'
 import axios from 'axios'
+import { Link } from 'react-router'
 
 
 const Banner = () => {
@@ -58,11 +59,11 @@ const Banner = () => {
                                             <h2 className='text-4xl my-2 font-semibold'>{movie.name}</h2>
                                             <h4 className='text-xl'>{movie.subtitle}</h4>
                                             <p className="my-2 text-main">Released on: {movie.release_date}</p>
-                                            <p className="my-2">Genre: <span className="text-main">{movie.genre}</span></p>
+                                            <p className="my-2">Genre: <span className="text-main">{movie.genres?.map((g) => g.name).join(", ")}</span></p>
                                         </div>
                                         <div className="banner-buttons p-5">
                                             <a href={movie.trailer} className="border border-gray-500 text-xs py-2 w-32 text-center inline-block rounded-full bg-secondary me-3" target='_blank'><FontAwesomeIcon icon={faCirclePlay} className='me-2' />Watch Trailer</a>
-                                            <a href="" className="border border-gray-500 text-xs py-2 w-32 text-center inline-block rounded-full bg-main text-black"><FontAwesomeIcon icon={faTicket} className='me-2' />Book Ticket</a>
+                                            <Link to={`/booking/${movie.slug}`} className="border border-gray-500 text-xs py-2 w-32 text-center inline-block rounded-full bg-main text-black"><FontAwesomeIcon icon={faTicket} className='me-2' />Book Ticket</Link>
                                         </div>
                                     </div>
                                 </div>

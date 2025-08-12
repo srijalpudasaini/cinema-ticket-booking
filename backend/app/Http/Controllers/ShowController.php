@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Movie;
 use App\Models\Seat;
 use App\Models\Show;
 use App\Models\ShowSeat;
@@ -21,7 +22,7 @@ class ShowController extends Controller
 
     public function show($id)
     {
-        $show = Show::find($id);
+        $show = Show::with('showSeat','showSeat.seat','bookings','bookings.user','bookings.booking_seats.showSeat.seat')->find($id);
 
         if (!$show) {
             return response()->json([
@@ -42,20 +43,29 @@ class ShowController extends Controller
             'movie_id' => 'required|exists:movies,id',
             'hall_id' => 'required|exists:halls,id',
             'date' => 'required|date|after_or_equal:today',
-            'time' => 'required'
+            'time' => 'required|date_format:H:i'
         ]);
 
-        $showVal = Show::where('date', $request->date)
-            ->where('time', $request->time)
-            ->where('hall_id', $request->hall_id)
-            ->where('id', '!=', $request->id)
-            ->exists(); 
+        $movie = Movie::find($request->movie_id);
+        $startTime = Carbon::parse($request->time);
+        $endTime = $startTime->copy()->addMinutes($movie->runtime);
 
-        if ($showVal) {
+        $overlappingShow = Show::where('date', $request->date)
+            ->where('hall_id', $request->hall_id)
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->where(function ($q) use ($startTime, $endTime) {
+                    $q->whereTime('time', '<', $endTime)
+                    ->whereRaw("ADDTIME(time, SEC_TO_TIME(movies.runtime*60)) > ?", [$startTime->format('H:i:s')]);
+                });
+            })
+            ->join('movies', 'shows.movie_id', '=', 'movies.id')
+            ->exists();
+
+        if ($overlappingShow) {
             return response()->json([
                 'status' => false,
-                'message' => 'A show already exists for this date, time, and hall'
-            ], 503);
+                'message' => 'Another show overlaps with the selected time in this hall.'
+            ], 409);
         }  
 
         $show = new Show();
@@ -130,6 +140,7 @@ class ShowController extends Controller
                 $s = new ShowSeat();
                 $s->show_id = $show->id;
                 $s->seat_id = $seat->id;
+                $s->row = $seat->row;
                 $s->save();
             }
         }
@@ -155,7 +166,8 @@ class ShowController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Show deleted successfully'
+            'message' => 'Show deleted successfully',
+            'shows'=> Show::orderBy('created_at','DESC')->get()
         ], 200);
     }
 
@@ -188,10 +200,11 @@ class ShowController extends Controller
     }
 
     public function getShowSeats(Request $request){
+        $time = Carbon::parse($request->time)->format('H:i:s');
         $show = Show::where('movie_id',$request->id)
                       ->where('date',$request->date)
                       ->where('hall_id',$request->hall_id)
-                      ->where('time',$request->time)
+                      ->where('time',$time)
                       ->with('showSeat')
                       ->with('showSeat.seat')
                       ->first();

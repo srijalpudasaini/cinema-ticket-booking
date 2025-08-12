@@ -34,6 +34,11 @@ import EditHall from './routes/admin/Hall/EditHall.jsx'
 import EditMovie from './routes/admin/Movie/EditMovie.jsx'
 import EditShow from './routes/admin/Show/EditShow.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import Scan from './routes/admin/Scan.jsx'
+import AddGenre from './routes/admin/Genre/AddGenre.jsx'
+import EditGenre from './routes/admin/Genre/EditGenre.jsx'
+import Genres from './routes/admin/Genre/Genres.jsx'
+import Error404 from './routes/Error404.jsx'
 
 const router = createBrowserRouter([
   {
@@ -43,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <Home />
+      },
+      {
+        path: "/404",
+        element: <Error404 />
       },
       {
         path: "about",
@@ -99,6 +108,14 @@ const router = createBrowserRouter([
         element: <Dashboard />
       },
       {
+        path: "404",
+        element: <Error404 />
+      },
+      {
+        path:"scanner",
+        element:<Scan />
+      },
+      {
         path: "movie/add",
         element: <AddMovie />
       },
@@ -119,7 +136,7 @@ const router = createBrowserRouter([
         element: <EditShow />
       },
       {
-        path: "show/view",
+        path: "show/view/:id",
         element: <ViewShow />
       },
       {
@@ -137,6 +154,18 @@ const router = createBrowserRouter([
       {
         path: "halls",
         element: <Halls />
+      },
+      {
+        path: "genre/add",
+        element: <AddGenre />
+      },
+      {
+        path: "genre/edit/:id",
+        element: <EditGenre />
+      },
+      {
+        path: "genres",
+        element: <Genres />
       },
       {
         path: "seat/add",

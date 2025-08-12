@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\GenreController;
 use App\Http\Controllers\HallController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ShowController;
@@ -45,6 +46,8 @@ Route::get('/showSeats',[ShowController::class,'getShowSeats']);
 
 Route::get('/halls', [HallController::class, 'index']);
 Route::get('/movies', [MovieController::class, 'index']);
+Route::get('/movie/recommended', [MovieController::class, 'hybridRecommend']);
+Route::get('/genres', [GenreController::class, 'index']);
 
 Route::middleware(['auth:sanctum',AdminMiddleware::class])->group(function () {
 
@@ -69,5 +72,13 @@ Route::middleware(['auth:sanctum',AdminMiddleware::class])->group(function () {
     Route::post('/movie/store', [MovieController::class, 'store']);
     Route::put('/movie/update/{id}', [MovieController::class, 'update']);
     Route::delete('/movie/delete/{id}', [MovieController::class, 'delete']);
+
+
+    Route::get('/genre/{id}', [GenreController::class, 'show']);
+    Route::post('/genre/store', [GenreController::class, 'store']);
+    Route::put('/genre/update/{id}', [GenreController::class, 'update']);
+    Route::delete('/genre/delete/{id}', [GenreController::class, 'delete']);
+
+    Route::post('/verify-ticket', [BookingController::class, 'verify']);
 });
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Show extends Model
@@ -18,6 +19,18 @@ class Show extends Model
 
     public function showSeat(){
         return $this->hasMany(ShowSeat::class);
+    }
+
+    public function bookings(){
+        return $this->hasMany(Booking::class);
+    }
+    public function getEndTime()
+    {
+        if (!$this->movie || !$this->time) {
+            return null;
+        }
+
+        return Carbon::parse($this->time)->addMinutes($this->movie->runtime);
     }
 
     //

@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 import Loader from '../../../components/Loader'
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import DeleteModal from '../../../components/DeleteModal'
 
 const Shows = () => {
     const [shows, setShows] = useState([]);
@@ -23,8 +24,17 @@ const Shows = () => {
                 setLoading(false)
             })
     }, [])
+    const [deleteModalOpen,setDeleteModalOpen] = useState(false)
+    const[id,setId] = useState(null)
+    const handleDelete = (id) =>{
+        setId(id)
+        setDeleteModalOpen(true)
+    }
     return (
         <>
+            {deleteModalOpen && 
+                <DeleteModal model={'show'} id={id} setOpen={setDeleteModalOpen} setData={setShows}/>
+            }
             <h2 className='text-2xl font-medium text-center mb-3'>Shows</h2>
             <div className="text-end mb-4">
                 <Link to='/admin/show/add' className='py-1 px-2 text-black bg-main'> + Add Show</Link>
@@ -48,13 +58,13 @@ const Shows = () => {
                                 <td>{show.time}</td>
                                 <td>{show.hall.name}</td>
                                 <td className='flex gap-4 justify-center'>
-                                    <Link to='/admin/show/view'>
+                                    <Link to={`/admin/show/view/${show.id}`}>
                                         <FontAwesomeIcon icon={faEye} className='text-green-600' size='xl' />
                                     </Link>
                                     <Link to={`/admin/show/edit/${show.id}`}>
                                         <FontAwesomeIcon icon={faPenSquare} className='text-blue-600' size='xl' />
                                     </Link>
-                                    <FontAwesomeIcon icon={faTrash} className='text-red-600' size='xl' />
+                                    <FontAwesomeIcon icon={faTrash} className='text-red-600 cursor-pointer' size='xl' onClick={()=>handleDelete(show.id)}/>
                                 </td>
                             </tr>
                         ))}

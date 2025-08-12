@@ -55,6 +55,7 @@ class HallController extends Controller
                 $row = chr(65 + $i);
                 $seat->row = $row;
                 $seat->number = $row.$j;
+                $seat->col = $j;
                 $seat->price = $request->price;
                 $seat->hall_id = $hall->id;
                 $seat->save();
@@ -108,6 +109,7 @@ class HallController extends Controller
                     $seat =  new Seat();
                     $row = chr(65 + $i);
                     $seat->number = $row.$j;
+                    $seat->col = $j;
                     $seat->price = $request->price;
                     $seat->hall_id = $hall->id;
                     $seat->save();
@@ -117,6 +119,7 @@ class HallController extends Controller
         }
 
         return response()->json([
+            'status'=>true,
             'message'=>'Hall updated successfully',
         ],200);        
     }
@@ -135,6 +138,7 @@ class HallController extends Controller
 
         return response()->json([
             'message'=>'Hall deleted successfully',
+            'halls'=> Hall::orderBy('created_at','DESC')->get()
         ],200); 
     }
 }

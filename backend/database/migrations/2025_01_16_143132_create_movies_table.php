@@ -21,9 +21,8 @@ return new class extends Migration
             $table->string('trailer');
             $table->float('rating');
             $table->date('release_date');
-            $table->string('runtime');
+            $table->integer('runtime');
             $table->string('director');
-            $table->string('genre');
             $table->enum('status',['ongoing','upcoming','previous']);
             $table->timestamps();
         });

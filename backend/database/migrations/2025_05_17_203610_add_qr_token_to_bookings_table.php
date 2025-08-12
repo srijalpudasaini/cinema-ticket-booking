@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('bookings', function (Blueprint $table) {
             $table->uuid('qr_token')->nullable()->unique();
+            $table->boolean('is_verified')->default(0);
             $table->timestamp('verified_at')->nullable();
         });
     }
