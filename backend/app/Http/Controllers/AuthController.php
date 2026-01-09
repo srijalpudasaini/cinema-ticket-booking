@@ -16,19 +16,14 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed'
         ]);
-
         $user = new User();
-
         $user->name = $request->name;
         $user->email = $request->email;
         $user->phone = $request->phone;
         $user->password = Hash::make($request->password);
         $user->role = 'user';
-        
         $user->save();
-
         $token = $user->createToken($request->name);
-
         return response()->json([
             'status'=>true,
             'message'=>'User registered successfully',
@@ -40,18 +35,14 @@ class AuthController extends Controller
             'email' => 'required|email|exists:users',
             'password' => 'required'
         ]);
-
         $user = User::where('email',$request->email)->first();
-
         if(!$user || !Hash::check($request->password,$user->password)){
             return response()->json([
                 'status'=>false,
                 'message'=>'Invalid credentials'
             ],404);
         }
-
         $token = $user->createToken($user->name);
-
         return response()->json([
             'status'=>true,
             'message'=>'Login successful',

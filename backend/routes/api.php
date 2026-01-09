@@ -43,10 +43,9 @@ Route::get('/movieDates',[ShowController::class,'getDates']);
 Route::get('/hallsByDate',[ShowController::class,'getHallsByDate']);
 Route::get('/timesByHall',[ShowController::class,'getTimesByHall']);
 Route::get('/showSeats',[ShowController::class,'getShowSeats']);
-
 Route::get('/halls', [HallController::class, 'index']);
 Route::get('/movies', [MovieController::class, 'index']);
-Route::get('/movie/recommended', [MovieController::class, 'hybridRecommend']);
+Route::middleware('auth:sanctum')->get('/movie/recommended', [MovieController::class, 'contentBasedRecommend']);
 Route::get('/genres', [GenreController::class, 'index']);
 
 Route::middleware(['auth:sanctum',AdminMiddleware::class])->group(function () {

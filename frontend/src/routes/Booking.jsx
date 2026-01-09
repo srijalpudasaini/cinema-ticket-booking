@@ -31,6 +31,9 @@ const Booking = () => {
     const [selectedTime, setSelectedTime] = useState();
     const [showSeats, setShowSeats] = useState([]);
     const [show, setShow] = useState();
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+
 
     const [seatLoading, setSeatLoading] = useState(false);
 
@@ -43,9 +46,10 @@ const Booking = () => {
     const [buyModalOpen, setBuyModalOpen] = useState(false)
     const navigate = useNavigate()
 
-    const [recommendedSeats,setRecommendedSeats] = useState(null)
+    const [recommendedSeats, setRecommendedSeats] = useState(null)
+    const [total, setTotal] = useState()
 
-     const formatMinutes = (minutes) =>{
+    const formatMinutes = (minutes) => {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
 
@@ -177,8 +181,8 @@ const Booking = () => {
                 setMovie(res.data.movie)
                 setLoading(false)
             })
-            .catch(err=>{
-                navigate('/404')  
+            .catch(err => {
+                navigate('/404')
             })
         axios.get('http://localhost:8000/api/user', {
             headers: {
@@ -245,7 +249,8 @@ const Booking = () => {
             if (res.data.status) {
                 setShowSeats(res.data.show_seats);
                 setSelectedSeats(res.data.show_seats.filter(s => s.status === 'unavailable' && s.user_id === user?.id));
-                setRecommendedSeats(res.data.best_group_seats)
+                setRecommendedSeats(res.data.best_group_seats.seats)
+                setTotal(res.data.best_group_seats.total_score)
             } else {
                 setMessage(res.data.message);
                 setShowSeats(res.data.show_seats);
@@ -273,7 +278,7 @@ const Booking = () => {
             await axios.post('http://localhost:8000/api/show/seatReset', {
                 _method: 'PUT',
                 show_id: show.id,
-                seats:selectedSeats.map((s)=>s.id)
+                seats: selectedSeats.map((s) => s.id)
             }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -308,24 +313,12 @@ const Booking = () => {
 
     }
 
-
-    const handleReservation = async () => {
-        if (!user) {
-            setMessage('Please login to reserve a seat');
-            setModalOpen(true)
-            return
-        }
-        if (selectedSeats.length === 0) {
-            setMessage('No seats selected');
-            setModalOpen(true)
-            return
-        }
-        const s = []
-        selectedSeats.map((seat) => s.push(seat.id));
+    const reserveNow = async () => {
         const token = Cookies.get('token');
+        const s = selectedSeats.map((seat) => seat.id);
 
         try {
-            await axios.post('http://localhost:8000/api/booking/store', {
+            const res = await axios.post('http://localhost:8000/api/booking/store', {
                 show_id: show.id,
                 total: price,
                 seats: s.join(',')
@@ -333,19 +326,48 @@ const Booking = () => {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
-            }).then((res) => {
-                if (res.data.status) {
-                    setMessage('Seat booking successful')
-                    setModalOpen(true)
-                    setShowSeats(res.data.show_seats)
-                    setSelectedSeats([])
-                }
-            })
+            });
+
+            if (res.data.status) {
+                setMessage('Seat booking successful');
+                setModalOpen(true);
+                setShowSeats(res.data.show_seats);
+                setSelectedSeats([]);
+            }
         } catch (error) {
-            setMessage(error.response.data.message || error.message)
+            setMessage(error.response?.data?.message || error.message);
+            setModalOpen(true);
+        }
+    };
+
+
+    const handleReservation = async () => {
+        if (!user) {
+            setMessage('Please login to reserve a seat');
+            setModalOpen(true);
+            return;
         }
 
-    }
+        if (selectedSeats.length === 0) {
+            setMessage('No seats selected');
+            setModalOpen(true);
+            return;
+        }
+
+        const selectedIds = selectedSeats.map((seat) => seat.id).sort();
+        const recommendedIds = (recommendedSeats ?? []).map((seat) => seat.show_seat_id).sort();
+
+        const isSame = JSON.stringify(selectedIds) === JSON.stringify(recommendedIds);
+
+        if (!isSame && recommendedSeats?.length > 0) {
+            setConfirmOpen(true); // Open confirmation modal
+            return;
+        }
+
+        // Proceed with reservation if same or no recommendations
+        await reserveNow();
+    };
+
     return (
         <>
             {
@@ -354,6 +376,18 @@ const Booking = () => {
                         {modalOpen &&
                             <Modal setOpen={setModalOpen} message={message} />
                         }
+                        {confirmOpen && (
+                            <Modal
+                                setOpen={setConfirmOpen}
+                                message={"You have not selected the recommended seats. Are you sure you want to continue?"}
+                                showButtons={true}
+                                onConfirm={() => {
+                                    setConfirmOpen(false);
+                                    reserveNow(); // Proceed if confirmed
+                                }}
+                            />
+                        )}
+
                         {buyModalOpen &&
                             <BuyModal
                                 setOpen={setBuyModalOpen}
@@ -374,13 +408,13 @@ const Booking = () => {
                         </div>
                         <div className="movie-details my-8">
                             <div className="container">
-                                <div className="rating-movie">
+                                {/* <div className="rating-movie">
                                     <FontAwesomeIcon icon={faStar} className='text-main' />
                                     <FontAwesomeIcon icon={faStar} className='text-main' />
                                     <FontAwesomeIcon icon={faStar} className='text-main' />
                                     <FontAwesomeIcon icon={faStar} className='text-main' />
                                     <FontAwesomeIcon icon={faStar} className='text-main' />
-                                </div>
+                                </div> */}
                                 <h2 className='text-2xl mb-4'>{movie.name} : {movie.subtitle}</h2>
                                 <table className='border-none max-sm:w-3/4 w-1/2 lg:w-1/4 text-sm'>
                                     <tr>
@@ -394,6 +428,10 @@ const Booking = () => {
                                     <tr>
                                         <td className='text-main'>Director:</td>
                                         <td>{movie.director}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className='text-main'>Rating:</td>
+                                        <td>{movie.rating}</td>
                                     </tr>
                                     <tr>
                                         <td className='text-main'>Genre:</td>
@@ -463,12 +501,19 @@ const Booking = () => {
                                                         {generateSeats()}
                                                         {recommendedSeats?.length > 0 &&
                                                             <p className="mt-4 text-center">
-                                                                Recommended Seats:
-                                                                {recommendedSeats?.map((seat)=>(
-                                                                    ` ${seat.row}${seat.col},`
+                                                                Recommended Seats:<br />
+                                                                {recommendedSeats?.map((seat, index) => (
+                                                                    <div key={index}>
+                                                                        {seat.row}{seat.col} Score: {seat.score}
+                                                                    </div>
                                                                 ))}
                                                             </p>
                                                         }
+                                                        <p className='text-center mt-1'>
+                                                            {total &&
+                                                                `Total Score: ${total}`
+                                                            }
+                                                        </p>
                                                     </div>
                                                 }
                                             </div>

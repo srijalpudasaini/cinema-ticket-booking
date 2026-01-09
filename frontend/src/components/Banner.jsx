@@ -49,13 +49,13 @@ const Banner = () => {
                                     <div className="banner-movie overlay h-[35vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] rounded-xl flex justify-between flex-col bg-[url('cover.jpg')]">
                                         <img src={`http://localhost:8000/uploads/movies/cover/${movie.cover}`} alt="" className="h-full w-full object-cover object-center absolute rounded-xl -z-10" />
                                         <div className="banner-details p-5">
-                                            <div className="rating">
+                                            {/* <div className="rating">
                                                 <FontAwesomeIcon icon={faStar} className='text-main' />
                                                 <FontAwesomeIcon icon={faStar} className='text-main' />
                                                 <FontAwesomeIcon icon={faStar} className='text-main' />
                                                 <FontAwesomeIcon icon={faStar} className='text-main' />
                                                 <FontAwesomeIcon icon={faStar} className='text-main' />
-                                            </div>
+                                            </div> */}
                                             <h2 className='text-4xl my-2 font-semibold'>{movie.name}</h2>
                                             <h4 className='text-xl'>{movie.subtitle}</h4>
                                             <p className="my-2 text-main">Released on: {movie.release_date}</p>

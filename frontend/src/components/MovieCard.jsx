@@ -26,13 +26,13 @@ const MovieCard = ({ movie }) => {
                 <Link to={`booking/${movie.slug}`}>
                     <div className="movie-thumbnail relative rounded-lg overlay">
                         <img src={`http://localhost:8000/uploads/movies/thumbnail/${movie.thumbnail}`} alt="" className='h-full object-cover w-full rounded-lg relative -z-10' />
-                        <div className="card-rating absolute top-2 right-2 bg-white/30 backdrop-blur-sm px-1 rounded-sm z-[2]">
+                        {/* <div className="card-rating absolute top-2 right-2 bg-white/30 backdrop-blur-sm px-1 rounded-sm z-[2]">
                             <FontAwesomeIcon icon={faStar} className='text-main text-xs' />
                             <FontAwesomeIcon icon={faStar} className='text-main text-xs' />
                             <FontAwesomeIcon icon={faStar} className='text-main text-xs' />
                             <FontAwesomeIcon icon={faStar} className='text-main text-xs' />
                             <FontAwesomeIcon icon={faStar} className='text-main text-xs' />
-                        </div>
+                        </div> */}
                         <div className="absolute left-2 bottom-2 bg-white/30 backdrop-blur-sm py-1 px-2 rounded-sm z-[2] text-xs">
                             <FontAwesomeIcon icon={faClock} className='text-main me-2' />
                             {formatMinutes(movie.runtime)}

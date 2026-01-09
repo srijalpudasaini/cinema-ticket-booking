@@ -33,32 +33,25 @@ class BookingController extends Controller
             'total' => 'required',
             'seats' => 'required'
         ]);
-
         $booking = new Booking();
-
         $booking->user_id = $request->user()->id;
         $booking->show_id = $request->show_id;
         $booking->total_price = $request->total;
         $booking->status = 'reserved';
         $seats = explode(',', $request->seats);
         $booking->save();
-
         foreach ($seats as $seat) {
             $s = new Booking_seat();
             $s->booking_id = $booking->id;
             $s->show_seat_id = $seat;
             $s->save();
-
             $show_seat = ShowSeat::findOrFail($seat);
-
             $show_seat->status = 'reserved';
             $show_seat->save();
         }
-
         $show_seats = ShowSeat::where('show_id', $request->show_id)
             ->with('seat')
             ->get();
-
         return response()->json([
             'status' => true,
             'message' => 'Booking successfully done',
@@ -69,7 +62,6 @@ class BookingController extends Controller
     public function getReservations(Request $request)
     {
         $user = $request->user();
-
         $reservations = Booking::where('user_id', $user->id)
             ->where('status', 'reserved')
             ->with('show.movie')

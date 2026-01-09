@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class MovieController extends Controller
@@ -207,78 +208,82 @@ class MovieController extends Controller
 
 
 
-    public function hybridRecommend(Request $request)
-    {
-        $user = $request->user();
+public function contentBasedRecommend(Request $request)
+{
+    $user = $request->user();
 
-        if (!$user) {
-            return response()->json([
-                'status' => true,
-                'movies' => Movie::orderBy('rating', 'desc')->take(5)->get(),
-            ], 200);
-        }
-        $bookedMovies = Booking::where('user_id', $user->id)
-            ->pluck('movie_id')
-            ->toArray();
-
-        if (empty($bookedMovies)) {
-            return response()->json([
-                'status' => true,
-                'movies' => Movie::orderBy('rating', 'desc')->take(5)->get(),
-            ], 200);
-        }
-
-        $genreIds = DB::table('movie_genres')
-            ->whereIn('movie_id', $bookedMovies)
-            ->pluck('genre_id')
-            ->unique()
-            ->toArray();
-
-        $contentBased = Movie::whereIn('id', function ($q) use ($genreIds) {
-            $q->select('movie_id')
-                ->from('movie_genre')
-                ->whereIn('genre_id', $genreIds);
-        })
-            ->whereNotIn('id', $bookedMovies)
-            ->with('genres')
-            ->get()
-            ->mapWithKeys(fn($m) => [$m->id => 1]);
-
-        $similarUsers = Booking::whereIn('movie_id', $bookedMovies)
-            ->where('user_id', '!=', $user->id)
-            ->pluck('user_id')
-            ->unique()
-            ->toArray();
-
-        $collabMovies = Booking::whereIn('user_id', $similarUsers)
-            ->whereNotIn('movie_id', $bookedMovies)
-            ->pluck('movie_id')
-            ->unique()
-            ->toArray();
-
-        $collaborative = Movie::whereIn('id', $collabMovies)
-            ->with('genres')
-            ->get()
-            ->mapWithKeys(fn($m) => [$m->id => 1]);
-
-        $finalScores = [];
-
-        foreach ($contentBased as $id => $score) {
-            $finalScores[$id] = ($finalScores[$id] ?? 0) + $score;
-        }
-        foreach ($collaborative as $id => $score) {
-            $finalScores[$id] = ($finalScores[$id] ?? 0) + $score;
-        }
-
-        arsort($finalScores);
-        $topIds = array_slice(array_keys($finalScores), 0, 5);
-
-         return response()->json([
-                'status'=>true,
-                'movies'=>Movie::whereIn('id', $topIds)
-                            ->with('genres')
-                            ->orderByRaw("FIELD(id, " . implode(',', $topIds) . ")")
-                            ->get(),
-                ],200);
+    if (!$user) {
+        return response()->json([
+            'status' => true,
+            'movies' => Movie::orderBy('rating', 'desc')->take(5)->get(),
+        ], 200);
     }
+
+    // Get movie IDs user has booked
+    $bookedMovieIds = Booking::where('user_id', $user->id)
+                ->with('show')
+                ->get()
+                ->pluck('show.movie_id')
+                ->unique()
+                ->toArray();
+
+    if (empty($bookedMovieIds)) {
+        return response()->json([
+            'status' => true,
+            'movies' => Movie::orderBy('rating', 'desc')->take(5)->get(),
+        ], 200);
+    }
+
+    // Get genres of booked movies
+    $bookedGenres = DB::table('movie_genres')
+        ->whereIn('movie_id', $bookedMovieIds)
+        ->pluck('genre_id')
+        ->unique()
+        ->toArray();
+
+    // Candidate movies (not yet booked by the user)
+    $candidates = Movie::whereNotIn('id', $bookedMovieIds)
+        ->with('genres')
+        ->get();
+
+    $scores = [];
+
+    foreach ($candidates as $movie) {
+        $candidateGenreIds = $movie->genres->pluck('id')->toArray();
+
+        $intersection = count(array_intersect($bookedGenres, $candidateGenreIds));
+        $union = count(array_unique(array_merge($bookedGenres, $candidateGenreIds)));
+
+        $jaccard = $union > 0 ? $intersection / $union : 0;
+
+        if ($jaccard > 0) {
+            $scores[$movie->id] = $jaccard;
+        }
+    }
+
+    arsort($scores);
+    $topIds = array_slice(array_keys($scores), 0, 5);
+
+    $recommended = Movie::whereIn('id', $topIds)
+        ->with('genres')
+        ->get()
+        ->keyBy('id');
+
+    // Attach the score to each movie
+    $moviesWithScores = [];
+    foreach ($topIds as $id) {
+        if (isset($recommended[$id])) {
+            $movie = $recommended[$id];
+            $movieData = $movie->toArray();
+            $movieData['score'] = round($scores[$id], 3); // Include score, rounded for clarity
+            $moviesWithScores[] = $movieData;
+        }
+    }
+
+    return response()->json([
+        'status' => true,
+        'movies' => $moviesWithScores,
+    ], 200);
+}
+
 }
